@@ -3,11 +3,15 @@ import { useApp } from '../AppContext';
 import './Inbox.css';
 
 function Inbox() {
-  const { currentUser, inbox, answerInboxQuestion } = useApp();
+  const { currentUser, inbox, answers, answerInboxQuestion } = useApp();
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
 
-  const userInbox = inbox[currentUser] || [];
+  // Filter out questions that have already been answered
+  const rawInbox = inbox[currentUser] || [];
+  const userAnswers = answers[currentUser] || [];
+  const answeredQuestionIds = new Set(userAnswers.map(a => a.questionId));
+  const userInbox = rawInbox.filter(item => !answeredQuestionIds.has(item.questionId));
 
   const handleSelectQuestion = (item) => {
     setSelectedQuestion(item);
