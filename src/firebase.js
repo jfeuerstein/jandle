@@ -1,22 +1,32 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getDatabase } from "firebase/database";
 
-// Firebase configuration
-// Replace these values with your actual Firebase project configuration
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBK9GxYz3K9YqQX_xQ3xQ3xQ3xQ3xQ3xQ3",
-  authDomain: "jandle-app.firebaseapp.com",
-  databaseURL: "https://jandle-app-default-rtdb.firebaseio.com",
-  projectId: "jandle-app",
-  storageBucket: "jandle-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Realtime Database
-const database = getDatabase(app);
+// Analytics can fail in some environments (like SSR); guard if desired
+let analytics;
+try {
+  analytics = getAnalytics(app);
+} catch (e) {
+  // ignore analytics init errors (e.g. when window isn't available)
+  // console.warn('Analytics not available:', e);
+}
 
-export { database };
+// Initialize and export the Realtime Database instance
+export const database = getDatabase(app);
+
+// optional exports if you need them elsewhere
+export { app, analytics };
