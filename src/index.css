@@ -14,9 +14,9 @@
 
   /* AOL IM Inspired Accent Colors (used sparingly) */
   --color-aim-yellow: #ffcc00;
-  --color-aim-blue: #3399ff;
-  --color-josh: #ff8844;
-  --color-nini: #cc66ff;
+  --color-aim-purple: #cc66ff;
+  --color-josh: rgb(203, 72, 72);
+  --color-nini: #468ed1;
 
   /* Semantic Colors */
   --color-error: #ff6b6b;

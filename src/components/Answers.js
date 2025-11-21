@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../AppContext';
 import './Answers.css';
 
@@ -9,6 +9,14 @@ function Answers() {
 
   const userAnswers = answers[currentUser] || [];
 
+  // ref for scrolling to the bottom of the messages
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+
+
   // Keep selectedAnswer in sync with the latest data from Firebase
   useEffect(() => {
     if (selectedAnswer) {
@@ -17,9 +25,18 @@ function Answers() {
       );
       if (updatedAnswer) {
         setSelectedAnswer(updatedAnswer);
+        scrollToBottom();
       }
     }
   }, [answers, currentUser, selectedAnswer?.questionId]);
+
+  // Ensure we scroll whenever the selected answer's messages change
+  useEffect(() => {
+    // run only when we have a selected answer
+    if (!selectedAnswer) return;
+    // scroll after render when messages length changes or a new question is selected
+    scrollToBottom();
+  }, [selectedAnswer?.messages?.length, selectedAnswer?.questionId]);
 
   const handleSelectAnswer = (answer) => {
     setSelectedAnswer(answer);
@@ -158,6 +175,8 @@ function Answers() {
                 <div className="chat-message-content">{msg.text}</div>
               </div>
             ))}
+          {/* end anchor for scrolling */}
+           <div style={{ float: "left", clear: "both" }} ref={messagesEndRef} />
           </div>
 
           <div className="answers-chat-input">
