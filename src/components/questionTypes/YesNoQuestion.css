@@ -23,7 +23,7 @@
 
 .yes-no-btn {
   font-family: 'Courier New', monospace;
-  font-size: 14px;
+  font-size: 12px;
   padding: 12px 24px;
   background: transparent;
   border: 1px solid var(--text-secondary);
