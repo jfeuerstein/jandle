@@ -3,7 +3,7 @@
  * Handles server-side API calls to protect API keys
  */
 
-const {onCall} = require("firebase-functions/v2/https");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {defineSecret} = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 
@@ -69,15 +69,24 @@ exports.generateQuestions = onCall(
 
         // Validate input
         if (!questionType || !count) {
-          throw new Error("Missing required parameters: questionType and count");
+          throw new HttpsError(
+              "invalid-argument",
+              "Missing required parameters: questionType and count",
+          );
         }
 
         if (!QUESTION_TYPES[questionType.toUpperCase()]) {
-          throw new Error(`Invalid question type: ${questionType}`);
+          throw new HttpsError(
+              "invalid-argument",
+              `Invalid question type: ${questionType}`,
+          );
         }
 
         if (typeof count !== "number" || count < 1 || count > 50) {
-          throw new Error("Count must be a number between 1 and 50");
+          throw new HttpsError(
+              "invalid-argument",
+              "Count must be a number between 1 and 50",
+          );
         }
 
         const typeConfig = QUESTION_TYPES[questionType.toUpperCase()];
@@ -113,7 +122,10 @@ exports.generateQuestions = onCall(
         if (!groqResponse.ok) {
           const errorText = await groqResponse.text();
           logger.error("Groq API error:", groqResponse.status, errorText);
-          throw new Error(`Groq API error: ${groqResponse.status}`);
+          throw new HttpsError(
+              "internal",
+              `Groq API error: ${groqResponse.status}`,
+          );
         }
 
         const data = await groqResponse.json();
@@ -121,7 +133,10 @@ exports.generateQuestions = onCall(
 
         if (!content) {
           logger.error("No content in Groq API response");
-          throw new Error("No content in Groq API response");
+          throw new HttpsError(
+              "internal",
+              "No content in Groq API response",
+          );
         }
 
         // Parse the JSON response
@@ -134,7 +149,15 @@ exports.generateQuestions = onCall(
         };
       } catch (error) {
         logger.error("Error generating questions:", error);
-        throw new Error(error.message || "Internal server error");
+        // If it's already an HttpsError, rethrow it
+        if (error instanceof HttpsError) {
+          throw error;
+        }
+        // Otherwise, wrap it in an HttpsError
+        throw new HttpsError(
+            "internal",
+            error.message || "Internal server error",
+        );
       }
     },
 );
