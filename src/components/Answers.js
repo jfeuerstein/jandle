@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../AppContext';
 import './Answers.css';
 
@@ -8,6 +8,18 @@ function Answers() {
   const [message, setMessage] = useState('');
 
   const userAnswers = answers[currentUser] || [];
+
+  // Keep selectedAnswer in sync with the latest data from Firebase
+  useEffect(() => {
+    if (selectedAnswer) {
+      const updatedAnswer = userAnswers.find(
+        answer => answer.questionId === selectedAnswer.questionId
+      );
+      if (updatedAnswer) {
+        setSelectedAnswer(updatedAnswer);
+      }
+    }
+  }, [answers, currentUser, selectedAnswer?.questionId]);
 
   const handleSelectAnswer = (answer) => {
     setSelectedAnswer(answer);
