@@ -17,7 +17,7 @@ function MultipleChoiceQuestion({ question, onAnswer, onSkip, disabled }) {
   return (
     <div className="multiple-choice-question">
       <div className="question-header">
-        <span className="question-number">question {question.id}</span>
+        <span className="question-number">question </span>
         <span className="question-type-badge">multiple choice</span>
       </div>
 

@@ -25,7 +25,7 @@ function ShortFormQuestion({ question, onAnswer, onSkip, disabled }) {
   return (
     <div className="long-form-question">
       <div className="question-header">
-        <span className="question-number">question {question.id}</span>
+        <span className="question-number">question </span>
         <span className="question-type-badge">short response</span>
       </div>
 

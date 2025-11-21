@@ -13,7 +13,7 @@ function YesNoQuestion({ question, onAnswer, onSkip, disabled }) {
   return (
     <div className="yes-no-question">
       <div className="question-header">
-        <span className="question-number">question {question.id}</span>
+        <span className="question-number">question </span>
         <span className="question-type-badge">yes/no</span>
       </div>
 

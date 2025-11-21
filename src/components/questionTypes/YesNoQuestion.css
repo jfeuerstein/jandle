@@ -30,6 +30,7 @@
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .yes-no-btn:hover:not(:disabled) {
