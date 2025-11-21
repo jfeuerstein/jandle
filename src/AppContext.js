@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { database } from './firebase';
+import { ref, set, get, onValue } from 'firebase/database';
 
 const AppContext = createContext();
 
@@ -32,6 +34,59 @@ export const AppProvider = ({ children }) => {
   // Format: { josh: [{questionId, questionText, joshAnswer, niniAnswer, messages: []}], nini: [...] }
   const [answers, setAnswers] = useState({ josh: [], nini: [] });
 
+  // Initialize Firebase data and set up listeners
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // Initialize default data structure if it doesn't exist
+        const dataRef = ref(database, '/');
+        const snapshot = await get(dataRef);
+
+        if (!snapshot.exists()) {
+          await set(dataRef, {
+            questionIndex: { josh: 0, nini: 0 },
+            inbox: { josh: [], nini: [] },
+            answers: { josh: [], nini: [] }
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing Firebase data:', error);
+      }
+    };
+
+    initializeData();
+
+    // Set up real-time listeners for data changes
+    const questionIndexRef = ref(database, 'questionIndex');
+    const inboxRef = ref(database, 'inbox');
+    const answersRef = ref(database, 'answers');
+
+    const unsubscribeQuestionIndex = onValue(questionIndexRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setQuestionIndex(snapshot.val());
+      }
+    });
+
+    const unsubscribeInbox = onValue(inboxRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setInbox(snapshot.val());
+      }
+    });
+
+    const unsubscribeAnswers = onValue(answersRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setAnswers(snapshot.val());
+      }
+    });
+
+    // Cleanup listeners on unmount
+    return () => {
+      unsubscribeQuestionIndex();
+      unsubscribeInbox();
+      unsubscribeAnswers();
+    };
+  }, []);
+
   const selectUser = (user) => {
     setCurrentUser(user);
     setCurrentPage('questions');
@@ -41,75 +96,84 @@ export const AppProvider = ({ children }) => {
     setCurrentPage(page);
   };
 
-  const answerQuestion = (questionId, questionText, answer) => {
+  const answerQuestion = async (questionId, questionText, answer) => {
     const otherUser = currentUser === 'josh' ? 'nini' : 'josh';
 
-    // Add to other user's inbox
-    setInbox(prev => ({
-      ...prev,
-      [otherUser]: [
-        ...prev[otherUser],
-        {
-          questionId,
-          questionText,
-          otherUserAnswer: answer,
-          answeredBy: currentUser
-        }
-      ]
-    }));
+    try {
+      // Add to other user's inbox in Firebase
+      const newInboxItem = {
+        questionId,
+        questionText,
+        otherUserAnswer: answer,
+        answeredBy: currentUser
+      };
 
-    // Move to next question
-    setQuestionIndex(prev => ({
-      ...prev,
-      [currentUser]: prev[currentUser] + 1
-    }));
+      const otherUserInbox = [...inbox[otherUser], newInboxItem];
+      await set(ref(database, `inbox/${otherUser}`), otherUserInbox);
+
+      // Move to next question in Firebase
+      await set(ref(database, `questionIndex/${currentUser}`), questionIndex[currentUser] + 1);
+    } catch (error) {
+      console.error('Error answering question:', error);
+    }
   };
 
-  const skipQuestion = () => {
-    // Move to next question without answering
-    setQuestionIndex(prev => ({
-      ...prev,
-      [currentUser]: prev[currentUser] + 1
-    }));
+  const skipQuestion = async () => {
+    try {
+      // Move to next question without answering in Firebase
+      await set(ref(database, `questionIndex/${currentUser}`), questionIndex[currentUser] + 1);
+    } catch (error) {
+      console.error('Error skipping question:', error);
+    }
   };
 
-  const answerInboxQuestion = (inboxItem, answer) => {
-    // Remove from inbox
-    setInbox(prev => ({
-      ...prev,
-      [currentUser]: prev[currentUser].filter(item => item.questionId !== inboxItem.questionId)
-    }));
+  const answerInboxQuestion = async (inboxItem, answer) => {
+    try {
+      // Remove from inbox in Firebase
+      const updatedInbox = inbox[currentUser].filter(item => item.questionId !== inboxItem.questionId);
+      await set(ref(database, `inbox/${currentUser}`), updatedInbox);
 
-    // Create answer object for both users
-    const answerObj = {
-      questionId: inboxItem.questionId,
-      questionText: inboxItem.questionText,
-      joshAnswer: currentUser === 'josh' ? answer : inboxItem.otherUserAnswer,
-      niniAnswer: currentUser === 'nini' ? answer : inboxItem.otherUserAnswer,
-      messages: [] // Chat messages go here
-    };
+      // Create answer object for both users
+      const answerObj = {
+        questionId: inboxItem.questionId,
+        questionText: inboxItem.questionText,
+        joshAnswer: currentUser === 'josh' ? answer : inboxItem.otherUserAnswer,
+        niniAnswer: currentUser === 'nini' ? answer : inboxItem.otherUserAnswer,
+        messages: [] // Chat messages go here
+      };
 
-    // Add to both users' answers
-    setAnswers(prev => ({
-      josh: [...prev.josh, answerObj],
-      nini: [...prev.nini, answerObj]
-    }));
+      // Add to both users' answers in Firebase
+      const updatedJoshAnswers = [...answers.josh, answerObj];
+      const updatedNiniAnswers = [...answers.nini, answerObj];
+
+      await set(ref(database, 'answers/josh'), updatedJoshAnswers);
+      await set(ref(database, 'answers/nini'), updatedNiniAnswers);
+    } catch (error) {
+      console.error('Error answering inbox question:', error);
+    }
   };
 
-  const sendMessage = (questionId, message) => {
-    // Add message to the chat thread for a specific question
-    setAnswers(prev => ({
-      josh: prev.josh.map(item =>
+  const sendMessage = async (questionId, message) => {
+    try {
+      const newMessage = { user: currentUser, text: message, timestamp: Date.now() };
+
+      // Update answers for both users in Firebase
+      const updatedJoshAnswers = answers.josh.map(item =>
         item.questionId === questionId
-          ? { ...item, messages: [...item.messages, { user: currentUser, text: message, timestamp: Date.now() }] }
+          ? { ...item, messages: [...item.messages, newMessage] }
           : item
-      ),
-      nini: prev.nini.map(item =>
+      );
+      const updatedNiniAnswers = answers.nini.map(item =>
         item.questionId === questionId
-          ? { ...item, messages: [...item.messages, { user: currentUser, text: message, timestamp: Date.now() }] }
+          ? { ...item, messages: [...item.messages, newMessage] }
           : item
-      )
-    }));
+      );
+
+      await set(ref(database, 'answers/josh'), updatedJoshAnswers);
+      await set(ref(database, 'answers/nini'), updatedNiniAnswers);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   const getCurrentQuestion = () => {
