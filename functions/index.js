@@ -17,18 +17,39 @@ const groqApiKey = defineSecret("GROQ_API_KEY");
 const QUESTION_TYPES = {
   YES_NO: {
     id: "yes_no",
-    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. Generate yes-or-no questions that are intimate, personal, and promote meaningful conversations. These should be questions that can be answered with yes or no, but encourage discussion afterward.`,
-    userPrompt: (count) => `Generate ${count} unique yes-or-no questions for couples. Each question should be answerable with yes or no, but thought-provoking enough to spark conversation. Return ONLY a JSON array of questions in this exact format: ["question 1?", "question 2?", "question 3?"]. No other text, just the JSON array.`,
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. 
+    Generate yes-or-no questions that are intimate, personal, and promote meaningful conversations. 
+    These should be questions that can be answered with yes or no, but encourage discussion afterward.`,
+    userPrompt: (count) =>
+      `Generate ${count} unique yes-or-no questions for couples. 
+    Each question should be answerable with yes or no, but thought-provoking enough to spark conversation. 
+    Return ONLY a JSON array of questions in this exact format: ["question 1?", "question 2?", "question 3?"]. 
+    No other text, just the JSON array.`,
   },
   MULTIPLE_CHOICE: {
     id: "multiple_choice",
-    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. Generate multiple choice questions that are intimate, personal, and promote meaningful conversations. Each question should have 3-4 interesting answer options that reveal something about the person's values, preferences, or perspectives.`,
-    userPrompt: (count) => `Generate ${count} unique multiple choice questions for couples. Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format: [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...]. No other text, just the JSON array.`,
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. 
+    Generate multiple choice questions that are intimate, personal, and promote meaningful conversations. 
+    Each question should have 3-4 interesting answer options that reveal something about the person's values, 
+    preferences, or perspectives.`,
+    userPrompt: (count) =>
+      `Generate ${count} unique multiple choice questions for couples. 
+    Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format: 
+    [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...]. 
+    No other text, just the JSON array.`,
   },
   LONG_FORM: {
     id: "long_form",
-    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. Generate questions that include a brief scenario or story (2-3 sentences) followed by an open-ended question that asks for the person's opinion, reaction, or perspective on the scenario. These should encourage detailed, thoughtful responses.`,
-    userPrompt: (count) => `Generate ${count} unique scenario-based questions for couples. Each should include a brief story or scenario (2-3 sentences) followed by a question asking for their opinion. Return ONLY a JSON array in this exact format: [{"scenario": "A brief scenario description...", "question": "What would you do?"}, ...]. No other text, just the JSON array.`,
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. 
+    Generate questions that include a brief scenario or story (2-3 sentences) 
+    followed by an open-ended question that asks for the person's opinion, reaction, or perspective on the scenario. 
+    These should encourage detailed, thoughtful responses.`,
+    userPrompt: (count) =>
+      `Generate ${count} unique scenario-based questions for couples. 
+    Each should include a brief story or scenario (2-3 sentences) followed by a question asking for their opinion. 
+    Return ONLY a JSON array in this exact format: 
+    [{"scenario": "A brief scenario description...", "question": "What would you do?"}, ...]. 
+    No other text, just the JSON array.`,
   },
 };
 
@@ -44,7 +65,7 @@ exports.generateQuestions = onRequest(
       maxInstances: 10,
     },
     async (req, res) => {
-      // Handle CORS preflight
+    // Handle CORS preflight
       if (req.method === "OPTIONS") {
         res.set("Access-Control-Allow-Origin", "*");
         res.set("Access-Control-Allow-Methods", "POST");
