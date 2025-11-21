@@ -87,6 +87,26 @@
   margin-bottom: var(--space-md);
 }
 
+.answers-list-compact {
+  margin-bottom: var(--space-md);
+}
+
+.answer-item-selected {
+  background: var(--bg-hover);
+  border: 2px solid var(--color-aim-yellow);
+  opacity: 1;
+}
+
+.answer-item-selected:hover {
+  transform: none;
+  cursor: default;
+}
+
+.answer-item-status {
+  color: var(--color-aim-yellow);
+  font-style: italic;
+}
+
 .answers-back-btn {
   background: transparent;
   border: 1px solid var(--border-primary);
