@@ -1,30 +1,27 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import QuestionRenderer from './QuestionRenderer';
 import './Inbox.css';
 
 function Inbox() {
   const { currentUser, inbox, answerInboxQuestion } = useApp();
   const [selectedQuestion, setSelectedQuestion] = useState(null);
-  const [answer, setAnswer] = useState('');
 
   const userInbox = inbox[currentUser] || [];
 
   const handleSelectQuestion = (item) => {
     setSelectedQuestion(item);
-    setAnswer('');
   };
 
-  const handleSubmitAnswer = () => {
-    if (answer.trim() && selectedQuestion) {
+  const handleSubmitAnswer = (answer) => {
+    if (answer && selectedQuestion) {
       answerInboxQuestion(selectedQuestion, answer);
       setSelectedQuestion(null);
-      setAnswer('');
     }
   };
 
   const handleCancel = () => {
     setSelectedQuestion(null);
-    setAnswer('');
   };
 
   if (userInbox.length === 0) {
@@ -91,11 +88,6 @@ function Inbox() {
             </div>
 
             <div className="inbox-answer-card">
-              <div className="inbox-answer-question">
-                <span className="inbox-answer-label">question:</span>
-                <p>{selectedQuestion.questionText}</p>
-              </div>
-
               <div className="inbox-answer-hidden">
                 <span className="inbox-answer-label">
                   {selectedQuestion.answeredBy}'s answer:
@@ -108,29 +100,18 @@ function Inbox() {
 
               <div className="inbox-answer-form">
                 <label className="inbox-answer-label">your answer:</label>
-                <textarea
-                  className="inbox-textarea"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="type your answer here..."
-                  rows="6"
-                  autoFocus
+                <QuestionRenderer
+                  question={{
+                    id: selectedQuestion.questionId,
+                    text: selectedQuestion.questionText,
+                    type: selectedQuestion.questionType || 'long_form',
+                    options: selectedQuestion.questionOptions,
+                    scenario: selectedQuestion.questionScenario
+                  }}
+                  onAnswer={handleSubmitAnswer}
+                  onSkip={handleCancel}
+                  mode="inbox"
                 />
-                <div className="inbox-answer-actions">
-                  <button
-                    className="inbox-btn inbox-btn-cancel"
-                    onClick={handleCancel}
-                  >
-                    [ cancel ]
-                  </button>
-                  <button
-                    className="inbox-btn inbox-btn-submit"
-                    onClick={handleSubmitAnswer}
-                    disabled={!answer.trim()}
-                  >
-                    [ submit & unlock ]
-                  </button>
-                </div>
               </div>
             </div>
           </div>

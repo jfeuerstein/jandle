@@ -1,0 +1,104 @@
+.long-form-question {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.question-scenario {
+  background: rgba(255, 204, 0, 0.05);
+  border-left: 3px solid var(--color-aim-yellow);
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.scenario-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-aim-yellow);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.scenario-text {
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.long-form-answer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.long-form-textarea {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  resize: vertical;
+  min-height: 150px;
+  transition: border-color 0.2s ease;
+}
+
+.long-form-textarea:focus {
+  outline: none;
+  border-color: var(--color-aim-purple);
+}
+
+.long-form-textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.long-form-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.long-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.long-form-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.long-form-btn:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.long-form-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.long-form-btn-answer:hover:not(:disabled),
+.long-form-btn-submit:hover:not(:disabled) {
+  border-color: var(--color-aim-purple);
+  color: var(--color-aim-purple);
+}
+
+.long-form-btn-skip,
+.long-form-btn-cancel {
+  color: var(--text-secondary);
+}
+
+.long-form-btn-skip:hover:not(:disabled),
+.long-form-btn-cancel:hover:not(:disabled) {
+  border-color: var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+}

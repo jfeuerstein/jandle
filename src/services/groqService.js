@@ -2,15 +2,18 @@
  * Groq API Service for generating questions
  */
 
+import { QUESTION_TYPES, getRandomQuestionType } from '../config/questionTypes';
+
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 
 /**
- * Generate a batch of deep, personal questions for couples
+ * Generate questions using Groq LLM for a specific question type
+ * @param {Object} questionType - The question type configuration
  * @param {number} count - Number of questions to generate
- * @returns {Promise<Array<{id: number, text: string}>>}
+ * @returns {Promise<Array>} Array of generated questions
  */
-export const generateQuestions = async (count = 10) => {
+const generateByType = async (questionType, count) => {
   if (!GROQ_API_KEY) {
     console.warn('GROQ_API_KEY not found in environment variables');
     throw new Error('Groq API key not configured');
@@ -27,13 +30,13 @@ export const generateQuestions = async (count = 10) => {
         model: 'llama-3.1-8b-instant',
         messages: [{
           role: 'system',
-          content: 'You are a relationship expert who creates deep, thought-provoking questions for couples. Generate questions that are intimate, personal, and promote meaningful conversations. Questions should be open-ended and encourage self-reflection.'
+          content: questionType.prompt
         }, {
           role: 'user',
-          content: `Generate ${count} unique, deep personal questions for couples to discuss. Each question should be intimate and thought-provoking. Return ONLY a JSON array of questions in this exact format: ["question 1?", "question 2?", "question 3?"]. No other text, just the JSON array.`
+          content: questionType.userPrompt(count)
         }],
         temperature: 0.9,
-        max_tokens: 1000
+        max_tokens: 2000
       })
     });
 
@@ -48,14 +51,79 @@ export const generateQuestions = async (count = 10) => {
       throw new Error('No content in Groq API response');
     }
 
-    // Parse the JSON array from the response
-    const questionsArray = JSON.parse(content.trim());
+    // Parse the JSON from the response
+    const parsedContent = JSON.parse(content.trim());
 
-    // Convert to the format expected by the app
-    return questionsArray.map((text, index) => ({
-      id: Date.now() + index, // Use timestamp-based IDs to ensure uniqueness
-      text: text.toLowerCase().trim()
-    }));
+    return parsedContent;
+
+  } catch (error) {
+    console.error(`Error generating ${questionType.id} questions with Groq:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Generate a batch of questions with mixed types
+ * @param {number} count - Total number of questions to generate
+ * @returns {Promise<Array<{id: number, type: string, text: string, ...}>>}
+ */
+export const generateQuestions = async (count = 10) => {
+  try {
+    // Distribute questions across different types
+    const questionsPerType = Math.floor(count / 3);
+    const remainder = count % 3;
+
+    const yesNoCount = questionsPerType + (remainder > 0 ? 1 : 0);
+    const multipleChoiceCount = questionsPerType + (remainder > 1 ? 1 : 0);
+    const longFormCount = questionsPerType;
+
+    console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${longFormCount} long-form questions`);
+
+    // Generate questions for each type in parallel
+    const [yesNoQuestions, multipleChoiceQuestions, longFormQuestions] = await Promise.all([
+      generateByType(QUESTION_TYPES.YES_NO, yesNoCount),
+      generateByType(QUESTION_TYPES.MULTIPLE_CHOICE, multipleChoiceCount),
+      generateByType(QUESTION_TYPES.LONG_FORM, longFormCount)
+    ]);
+
+    // Convert to app format
+    let allQuestions = [];
+    let idCounter = Date.now();
+
+    // Yes/No questions
+    yesNoQuestions.forEach(text => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'yes_no',
+        text: text.toLowerCase().trim()
+      });
+    });
+
+    // Multiple choice questions
+    multipleChoiceQuestions.forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'multiple_choice',
+        text: q.question.toLowerCase().trim(),
+        options: q.options
+      });
+    });
+
+    // Long-form questions
+    longFormQuestions.forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'long_form',
+        text: q.question.toLowerCase().trim(),
+        scenario: q.scenario
+      });
+    });
+
+    // Shuffle the questions for variety
+    allQuestions = shuffleArray(allQuestions);
+
+    console.log(`Successfully generated ${allQuestions.length} questions of mixed types`);
+    return allQuestions;
 
   } catch (error) {
     console.error('Error generating questions with Groq:', error);
@@ -64,10 +132,49 @@ export const generateQuestions = async (count = 10) => {
 };
 
 /**
- * Generate a single question
- * @returns {Promise<{id: number, text: string}>}
+ * Generate a single question of a random type
+ * @returns {Promise<Object>}
  */
 export const generateSingleQuestion = async () => {
-  const questions = await generateQuestions(1);
-  return questions[0];
+  const questionType = getRandomQuestionType();
+  const questions = await generateByType(questionType, 1);
+
+  let question = questions[0];
+
+  // Format based on type
+  if (questionType.id === 'yes_no') {
+    return {
+      id: Date.now(),
+      type: 'yes_no',
+      text: question.toLowerCase().trim()
+    };
+  } else if (questionType.id === 'multiple_choice') {
+    return {
+      id: Date.now(),
+      type: 'multiple_choice',
+      text: question.question.toLowerCase().trim(),
+      options: question.options
+    };
+  } else if (questionType.id === 'long_form') {
+    return {
+      id: Date.now(),
+      type: 'long_form',
+      text: question.question.toLowerCase().trim(),
+      scenario: question.scenario
+    };
+  }
+};
+
+/**
+ * Shuffle array using Fisher-Yates algorithm
+ * @param {Array} array - Array to shuffle
+ * @returns {Array} Shuffled array
+ */
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 };
