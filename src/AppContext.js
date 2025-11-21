@@ -127,7 +127,12 @@ export const AppProvider = ({ children }) => {
 
     const unsubscribeInbox = onValue(inboxRef, (snapshot) => {
       if (snapshot.exists()) {
-        setInbox(snapshot.val());
+        const inboxData = snapshot.val();
+        // Ensure inbox values are arrays (Firebase stores empty arrays as null)
+        setInbox({
+          josh: inboxData.josh || [],
+          nini: inboxData.nini || []
+        });
       }
     });
 
@@ -171,17 +176,25 @@ export const AppProvider = ({ children }) => {
 
     try {
       // Add to other user's inbox in Firebase with question type data
+      // Only include optional properties if they exist (Firebase doesn't allow undefined values)
       const newInboxItem = {
         questionId,
         questionText,
         questionType: questionType || 'long_form',
-        questionOptions: questionData?.options,
-        questionScenario: questionData?.scenario,
         otherUserAnswer: answer,
         answeredBy: currentUser
       };
 
-      const otherUserInbox = [...inbox[otherUser], newInboxItem];
+      // Conditionally add optional properties only if they're defined
+      if (questionData?.options) {
+        newInboxItem.questionOptions = questionData.options;
+      }
+      if (questionData?.scenario) {
+        newInboxItem.questionScenario = questionData.scenario;
+      }
+
+      // Firebase stores empty arrays as null, so we need to handle that
+      const otherUserInbox = [...(inbox[otherUser] || []), newInboxItem];
       await set(ref(database, `inbox/${otherUser}`), otherUserInbox);
 
       // Move to next question in Firebase
@@ -202,8 +215,8 @@ export const AppProvider = ({ children }) => {
 
   const answerInboxQuestion = async (inboxItem, answer) => {
     try {
-      // Remove from inbox in Firebase
-      const updatedInbox = inbox[currentUser].filter(item => item.questionId !== inboxItem.questionId);
+      // Remove from inbox in Firebase (handle null from Firebase)
+      const updatedInbox = (inbox[currentUser] || []).filter(item => item.questionId !== inboxItem.questionId);
       await set(ref(database, `inbox/${currentUser}`), updatedInbox);
 
       // Create answer object for both users
@@ -215,9 +228,9 @@ export const AppProvider = ({ children }) => {
         messages: [] // Chat messages go here
       };
 
-      // Add to both users' answers in Firebase
-      const updatedJoshAnswers = [...answers.josh, answerObj];
-      const updatedNiniAnswers = [...answers.nini, answerObj];
+      // Add to both users' answers in Firebase (handle null from Firebase)
+      const updatedJoshAnswers = [...(answers.josh || []), answerObj];
+      const updatedNiniAnswers = [...(answers.nini || []), answerObj];
 
       await set(ref(database, 'answers/josh'), updatedJoshAnswers);
       await set(ref(database, 'answers/nini'), updatedNiniAnswers);
@@ -230,13 +243,13 @@ export const AppProvider = ({ children }) => {
     try {
       const newMessage = { user: currentUser, text: message, timestamp: Date.now() };
 
-      // Update answers for both users in Firebase
-      const updatedJoshAnswers = answers.josh.map(item =>
+      // Update answers for both users in Firebase (handle null from Firebase)
+      const updatedJoshAnswers = (answers.josh || []).map(item =>
         item.questionId === questionId
           ? { ...item, messages: [...(item.messages || []), newMessage] }
           : item
       );
-      const updatedNiniAnswers = answers.nini.map(item =>
+      const updatedNiniAnswers = (answers.nini || []).map(item =>
         item.questionId === questionId
           ? { ...item, messages: [...(item.messages || []), newMessage] }
           : item
