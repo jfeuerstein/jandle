@@ -1,64 +1,54 @@
 /**
  * Groq API Service for generating questions
+ * Now uses Firebase Cloud Functions to protect API keys
  */
 
 import { QUESTION_TYPES, getRandomQuestionType } from '../config/questionTypes';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '../firebase';
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
+// Initialize Firebase Functions
+const functions = getFunctions(app);
+
+// For local development with emulator, uncomment:
+// import { connectFunctionsEmulator } from 'firebase/functions';
+// connectFunctionsEmulator(functions, 'localhost', 5001);
 
 /**
- * Generate questions using Groq LLM for a specific question type
+ * Generate questions using Cloud Function (which calls Groq API)
  * @param {Object} questionType - The question type configuration
  * @param {number} count - Number of questions to generate
  * @returns {Promise<Array>} Array of generated questions
  */
 const generateByType = async (questionType, count) => {
-  if (!GROQ_API_KEY) {
-    console.warn('GROQ_API_KEY not found in environment variables');
-    throw new Error('Groq API key not configured');
-  }
-
   try {
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        messages: [{
-          role: 'system',
-          content: questionType.prompt
-        }, {
-          role: 'user',
-          content: questionType.userPrompt(count)
-        }],
-        temperature: 0.9,
-        max_tokens: 2000
-      })
+    // Call the Cloud Function
+    const generateQuestions = httpsCallable(functions, 'generateQuestions');
+
+    const result = await generateQuestions({
+      questionType: questionType.id,
+      count: count
     });
 
-    if (!response.ok) {
-      throw new Error(`Groq API error: ${response.status} ${response.statusText}`);
+    if (!result.data.success) {
+      throw new Error(result.data.error || 'Unknown error from Cloud Function');
     }
 
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
-
-    if (!content) {
-      throw new Error('No content in Groq API response');
-    }
-
-    // Parse the JSON from the response
-    const parsedContent = JSON.parse(content.trim());
-
-    return parsedContent;
+    return result.data.questions;
 
   } catch (error) {
-    console.error(`Error generating ${questionType.id} questions with Groq:`, error);
-    throw error;
+    console.error(`Error generating ${questionType.id} questions:`, error);
+
+    // Provide more helpful error messages
+    if (error.code === 'functions/unauthenticated') {
+      throw new Error('Authentication required to generate questions');
+    } else if (error.code === 'functions/not-found') {
+      throw new Error('Question generation service not available. Please ensure Firebase Functions are deployed.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to generate questions. Please try again.');
+    }
   }
 };
 
