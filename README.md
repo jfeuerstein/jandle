@@ -1,70 +1,467 @@
-# Getting Started with Create React App
+# jandle
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ 
 
-## Available Scripts
+A question and answer web app that facilitates meaningful conversations between two users through an asymmetric Q&A flow.
 
-In the project directory, you can run:
+ 
 
-### `npm start`
+## Project Goal
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+ 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Jandle creates a unique conversation experience where users answer questions independently, which then unlock deeper discussions. The app encourages thoughtful responses by hiding the other person's answer until you've shared your own perspective.
 
-### `npm test`
+ 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## How It Works
 
-### `npm run build`
+ 
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### The Flow
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+ 
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **User Selection** - Choose to view the app as either Josh or Nini
 
-### `npm run eject`
+2. **Questions Page** - Browse questions one at a time (dating app style)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+   - Answer questions to send them to the other user's inbox
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+   - Skip questions you don't want to answer
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+3. **Inbox** - Answer questions the other user has already responded to
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+   - Their answer is hidden until you submit yours
 
-## Learn More
+   - Prevents bias and encourages authentic responses
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+4. **Answers** - View completed question pairs and continue the conversation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   - Both answers are revealed side-by-side
 
-### Code Splitting
+   - Chat interface for follow-up discussion
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+   - Each question becomes its own conversation thread
 
-### Analyzing the Bundle Size
+ 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### User Experience
 
-### Making a Progressive Web App
+ 
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```
 
-### Advanced Configuration
+┌─────────────────────────────────────────────────────┐
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+│                                                     │
 
-### Deployment
+│  Josh answers Q1          ─────>    Q1 → Nini's    │
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+│                                         Inbox       │
 
-### `npm run build` fails to minify
+│                                                     │
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+│  Nini answers Q1          ─────>    Q1 moves to    │
+
+│  (Josh's answer hidden)              Answers        │
+
+│                                                     │
+
+│  Both can now see both             Chat unlocked   │
+
+│  answers and chat                                  │
+
+│                                                     │
+
+└─────────────────────────────────────────────────────┘
+
+```
+
+ 
+
+## Implementation Plan
+
+ 
+
+### Phase 1: Core Infrastructure ✅
+
+- [x] Set up React app with Create React App
+
+- [x] Implement Josh-thetic design system (CSS variables, typography)
+
+- [x] Create global state management with React Context API
+
+- [x] Build component architecture (UserSelect, Navigation, Pages)
+
+ 
+
+### Phase 2: Question Flow ✅
+
+- [x] User selection screen
+
+- [x] Questions page with dating-app style interface
+
+- [x] Answer/skip functionality
+
+- [x] Question state tracking per user
+
+ 
+
+### Phase 3: Inbox System ✅
+
+- [x] Inbox page showing pending questions
+
+- [x] Hidden answer display (locked until user responds)
+
+- [x] Answer submission that unlocks both responses
+
+ 
+
+### Phase 4: Chat Interface ✅
+
+- [x] Answers page with question list view
+
+- [x] Individual chat threads per question
+
+- [x] Real-time message display
+
+- [x] Message composition and sending
+
+ 
+
+### Phase 5: Future Enhancements 🔮
+
+- [ ] Persistent storage (localStorage or backend API)
+
+- [ ] Question generation algorithm
+
+- [ ] Notification system for new inbox items
+
+- [ ] Question categories and filtering
+
+- [ ] User profiles and settings
+
+- [ ] Mobile app version
+
+ 
+
+## Design Philosophy
+
+ 
+
+Jandle follows the **Josh-thetic** design principles:
+
+ 
+
+### Visual Design
+
+- **Monospace typography** - Courier New exclusively
+
+- **Terminal aesthetic** - Dark background (#0a0a0a), minimal chrome
+
+- **AOL IM inspiration** - Nostalgic color accents (yellow, blue) used sparingly
+
+- **ASCII art** - Box-drawing characters for borders and decoration
+
+- **Flat design** - No shadows, gradients, or 3D effects
+
+ 
+
+### Interaction Design
+
+- **Focus over features** - Clean, distraction-free interface
+
+- **Immediate feedback** - Hover states, animations under 300ms
+
+- **Keyboard accessible** - Full keyboard navigation support
+
+- **Mobile responsive** - Works on all screen sizes
+
+ 
+
+### Technical Approach
+
+- **Vanilla CSS** - No preprocessors, CSS variables for theming
+
+- **React Context** - Local state management, no external libraries
+
+- **Component isolation** - Each component has its own CSS file
+
+- **Performance first** - Minimal dependencies, fast load times
+
+ 
+
+## Tech Stack
+
+ 
+
+- **React 19.2** - UI framework
+
+- **React Context API** - State management
+
+- **CSS3** - Styling with custom properties
+
+- **Create React App** - Build tooling
+
+ 
+
+## Getting Started
+
+ 
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+
+- npm or yarn
+
+ 
+
+### Installation
+
+ 
+
+```bash
+
+# Clone the repository
+
+git clone https://github.com/jfeuerstein/jandle.git
+
+ 
+
+# Navigate to project directory
+
+cd jandle
+
+ 
+
+# Install dependencies
+
+npm install
+
+ 
+
+# Start development server
+
+npm start
+
+```
+
+ 
+
+The app will open at `http://localhost:3000`
+
+ 
+
+### Available Scripts
+
+ 
+
+```bash
+
+npm start    # Run development server
+
+npm build    # Create production build
+
+npm test     # Run test suite
+
+```
+
+ 
+
+## Project Structure
+
+ 
+
+```
+
+jandle/
+
+├── public/
+
+│   └── index.html
+
+├── src/
+
+│   ├── components/
+
+│   │   ├── UserSelect.js      # Landing page for user selection
+
+│   │   ├── Navigation.js       # Top navigation bar
+
+│   │   ├── Questions.js        # Dating-app style question flow
+
+│   │   ├── Inbox.js            # Pending questions from other user
+
+│   │   └── Answers.js          # Chat interface for completed Q&A
+
+│   ├── AppContext.js           # Global state management
+
+│   ├── App.js                  # Main app component
+
+│   ├── App.css                 # App-level styles
+
+│   └── index.css               # Global styles and design system
+
+├── JOSH-THETIC.md              # Design philosophy guide
+
+├── package.json
+
+└── README.md
+
+```
+
+ 
+
+## State Management
+
+ 
+
+The app uses React Context API to manage:
+
+ 
+
+- **Current user** - Which user is viewing the app (Josh or Nini)
+
+- **Current page** - Active view (questions, inbox, answers)
+
+- **Questions pool** - Available questions to answer
+
+- **Question index** - Current position in question flow per user
+
+- **Inbox** - Questions waiting for user's response
+
+- **Answers** - Completed question pairs with chat threads
+
+ 
+
+### Data Flow
+
+ 
+
+```javascript
+
+// User answers a question
+
+answerQuestion(questionId, questionText, answer)
+
+  → Adds to other user's inbox
+
+ 
+
+// User answers inbox question
+
+answerInboxQuestion(inboxItem, answer)
+
+  → Removes from inbox
+
+  → Creates answer pair for both users
+
+  → Unlocks chat thread
+
+ 
+
+// User sends chat message
+
+sendMessage(questionId, message)
+
+  → Adds to conversation thread
+
+  → Visible to both users
+
+```
+
+ 
+
+## Current Questions
+
+ 
+
+The app currently includes three starter questions:
+
+ 
+
+1. "what is your earliest childhood memory?"
+
+2. "if you could have dinner with anyone dead or alive, who would it be?"
+
+3. "what song would you want played at your funeral?"
+
+ 
+
+These questions are hardcoded in `AppContext.js` and will be replaced with a dynamic question generation system in future versions.
+
+ 
+
+## Color Palette
+
+ 
+
+```css
+
+/* Background & Text */
+
+--bg-primary: #0a0a0a        /* Near-black background */
+
+--text-primary: #e0e0e0      /* Light grey text */
+
+--text-secondary: #999       /* Subtle text */
+
+ 
+
+/* Accent Colors (AOL IM inspired) */
+
+--color-aim-yellow: #ffcc00  /* Logo and highlights */
+
+--color-aim-blue: #3399ff    /* Active states */
+
+--color-josh: #ff8844        /* Josh's color */
+
+--color-nini: #cc66ff        /* Nini's color */
+
+```
+
+ 
+
+## Contributing
+
+ 
+
+This is a personal project, but suggestions and feedback are welcome! Please open an issue to discuss proposed changes.
+
+ 
+
+## License
+
+ 
+
+MIT License - feel free to use this project as inspiration for your own Q&A apps.
+
+ 
+
+## Acknowledgments
+
+ 
+
+- Design inspired by terminal interfaces and AOL Instant Messenger
+
+- Built following the Josh-thetic design philosophy
+
+- Created with React and lots of monospace font love
+
+ 
+
+---
+
+ 
+
+```
+
+┌────────────────────────────┐
+
+│ built with the josh-thetic │
+
+└────────────────────────────┘
+
+```
