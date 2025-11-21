@@ -73,7 +73,7 @@ function Answers() {
                 </div>
                 <div className="answer-item-footer">
                   <span className="answer-item-messages">
-                    {answer.messages.length > 0
+                    {(answer.messages && answer.messages.length > 0)
                       ? `${answer.messages.length} message${answer.messages.length !== 1 ? 's' : ''}`
                       : 'no messages yet'}
                   </span>
@@ -124,13 +124,13 @@ function Answers() {
               </div>
             </div>
 
-            {selectedAnswer.messages.length > 0 && (
+            {selectedAnswer.messages && selectedAnswer.messages.length > 0 && (
               <div className="chat-divider">
                 <span>continued conversation</span>
               </div>
             )}
 
-            {selectedAnswer.messages.map((msg, index) => (
+            {selectedAnswer.messages && selectedAnswer.messages.map((msg, index) => (
               <div
                 key={index}
                 className={`chat-message chat-message-${msg.user} ${
