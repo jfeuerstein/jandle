@@ -65,8 +65,8 @@
 }
 
 .nav-btn.active {
-  border-color: var(--color-aim-blue);
-  color: var(--color-aim-blue);
+  border-color: var(--color-aim-purple);
+  color: var(--color-aim-purple);
 }
 
 .nav-btn:active {

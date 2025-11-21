@@ -462,7 +462,7 @@ These questions are hardcoded in `AppContext.js` and will be replaced with a dyn
 
 --color-aim-yellow: #ffcc00  /* Logo and highlights */
 
---color-aim-blue: #3399ff    /* Active states */
+--color-aim-purple: #3399ff    /* Active states */
 
 --color-josh: #ff8844        /* Josh's color */
 

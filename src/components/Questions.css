@@ -26,7 +26,7 @@
 }
 
 .question-number {
-  color: var(--color-aim-blue);
+  color: var(--color-aim-purple);
   font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 1px;

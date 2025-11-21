@@ -43,7 +43,7 @@
 }
 
 .inbox-item:hover {
-  border-color: var(--color-aim-blue);
+  border-color: var(--color-aim-purple);
   transform: translateX(5px);
 }
 
@@ -136,7 +136,7 @@
 
 .inbox-answer-label {
   display: block;
-  color: var(--color-aim-blue);
+  color: var(--color-aim-purple);
   font-size: var(--text-sm);
   margin-bottom: var(--space-sm);
   text-transform: uppercase;

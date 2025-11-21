@@ -117,7 +117,7 @@
 
 .answers-chat-label {
   display: block;
-  color: var(--color-aim-blue);
+  color: var(--color-aim-purple);
   font-size: var(--text-xs);
   margin-bottom: var(--space-xs);
   text-transform: uppercase;
