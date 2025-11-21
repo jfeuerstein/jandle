@@ -3,7 +3,7 @@
  * Handles server-side API calls to protect API keys
  */
 
-const {onRequest} = require("firebase-functions/v2/https");
+const {onCall} = require("firebase-functions/v2/https");
 const {defineSecret} = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 
@@ -55,54 +55,29 @@ const QUESTION_TYPES = {
 
 /**
  * Generate questions using Groq API
- * Endpoint: POST /generateQuestions
- * Body: { questionType: 'yes_no' | 'multiple_choice' | 'long_form', count: number }
+ * Callable function for Firebase
+ * Data: { questionType: 'yes_no' | 'multiple_choice' | 'long_form', count: number }
  */
-exports.generateQuestions = onRequest(
+exports.generateQuestions = onCall(
     {
       secrets: [groqApiKey],
-      cors: true,
       maxInstances: 10,
     },
-    async (req, res) => {
-    // Handle CORS preflight
-      if (req.method === "OPTIONS") {
-        res.set("Access-Control-Allow-Origin", "*");
-        res.set("Access-Control-Allow-Methods", "POST");
-        res.set("Access-Control-Allow-Headers", "Content-Type");
-        res.status(204).send("");
-        return;
-      }
-
-      // Only allow POST requests
-      if (req.method !== "POST") {
-        res.status(405).json({error: "Method not allowed"});
-        return;
-      }
-
+    async (request) => {
       try {
-        const {questionType, count} = req.body;
+        const {questionType, count} = request.data;
 
         // Validate input
         if (!questionType || !count) {
-          res.status(400).json({
-            error: "Missing required parameters: questionType and count",
-          });
-          return;
+          throw new Error("Missing required parameters: questionType and count");
         }
 
         if (!QUESTION_TYPES[questionType.toUpperCase()]) {
-          res.status(400).json({
-            error: `Invalid question type: ${questionType}`,
-          });
-          return;
+          throw new Error(`Invalid question type: ${questionType}`);
         }
 
         if (typeof count !== "number" || count < 1 || count > 50) {
-          res.status(400).json({
-            error: "Count must be a number between 1 and 50",
-          });
-          return;
+          throw new Error("Count must be a number between 1 and 50");
         }
 
         const typeConfig = QUESTION_TYPES[questionType.toUpperCase()];
@@ -138,10 +113,7 @@ exports.generateQuestions = onRequest(
         if (!groqResponse.ok) {
           const errorText = await groqResponse.text();
           logger.error("Groq API error:", groqResponse.status, errorText);
-          res.status(500).json({
-            error: `Groq API error: ${groqResponse.status}`,
-          });
-          return;
+          throw new Error(`Groq API error: ${groqResponse.status}`);
         }
 
         const data = await groqResponse.json();
@@ -149,26 +121,20 @@ exports.generateQuestions = onRequest(
 
         if (!content) {
           logger.error("No content in Groq API response");
-          res.status(500).json({
-            error: "No content in Groq API response",
-          });
-          return;
+          throw new Error("No content in Groq API response");
         }
 
         // Parse the JSON response
         const parsedContent = JSON.parse(content.trim());
 
-        res.status(200).json({
+        return {
           success: true,
           questions: parsedContent,
           questionType: typeConfig.id,
-        });
+        };
       } catch (error) {
         logger.error("Error generating questions:", error);
-        res.status(500).json({
-          error: "Internal server error",
-          message: error.message,
-        });
+        throw new Error(error.message || "Internal server error");
       }
     },
 );
