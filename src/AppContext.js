@@ -171,15 +171,22 @@ export const AppProvider = ({ children }) => {
 
     try {
       // Add to other user's inbox in Firebase with question type data
+      // Only include optional properties if they exist (Firebase doesn't allow undefined values)
       const newInboxItem = {
         questionId,
         questionText,
         questionType: questionType || 'long_form',
-        questionOptions: questionData?.options,
-        questionScenario: questionData?.scenario,
         otherUserAnswer: answer,
         answeredBy: currentUser
       };
+
+      // Conditionally add optional properties only if they're defined
+      if (questionData?.options) {
+        newInboxItem.questionOptions = questionData.options;
+      }
+      if (questionData?.scenario) {
+        newInboxItem.questionScenario = questionData.scenario;
+      }
 
       const otherUserInbox = [...inbox[otherUser], newInboxItem];
       await set(ref(database, `inbox/${otherUser}`), otherUserInbox);
