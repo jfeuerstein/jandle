@@ -1,13 +1,123 @@
+/* Josh-thetic Global Styles with AOL IM Inspiration */
+
+:root {
+  /* Primary Colors - Dark terminal base */
+  --bg-primary: #0a0a0a;
+  --text-primary: #e0e0e0;
+  --border-primary: #333;
+
+  /* Secondary Greys */
+  --text-secondary: #999;
+  --text-muted: #666;
+  --bg-hover: #1a1a1a;
+  --border-focus: #e0e0e0;
+
+  /* AOL IM Inspired Accent Colors (used sparingly) */
+  --color-aim-yellow: #ffcc00;
+  --color-aim-blue: #3399ff;
+  --color-josh: #ff8844;
+  --color-nini: #cc66ff;
+
+  /* Semantic Colors */
+  --color-error: #ff6b6b;
+  --color-success: #44ff44;
+  --color-info: #4a9eff;
+  --color-warning: #ff8844;
+
+  /* Spacing Scale */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+
+  /* Type Scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.85rem;
+  --text-base: 1rem;
+  --text-lg: 1.1rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Courier New', monospace;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'Courier New', monospace;
+}
+
+button {
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea {
+  font-family: 'Courier New', monospace;
+}
+
+/* Utility Classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-sm);
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
