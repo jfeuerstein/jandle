@@ -472,9 +472,41 @@ These questions are hardcoded in `AppContext.js` and will be replaced with a dyn
 
  
 
+## Security
+
+🔒 **API Key Protection**
+
+This app uses Firebase Cloud Functions to protect sensitive API keys (like Groq API keys) from being exposed in client-side code.
+
+**Important**: Never put secret API keys in `.env` files for React apps - they will be embedded in your JavaScript bundle and visible to anyone viewing your website's source code.
+
+### Security Features
+
+- ✅ API keys stored as Firebase secrets (server-side only)
+- ✅ Cloud Functions handle external API calls
+- ✅ Firebase Security Rules validate data structure
+- ✅ Environment variables properly managed
+
+### Setup Guides
+
+- [SECURITY.md](SECURITY.md) - Security best practices and what to do if keys are exposed
+- [CLOUD_FUNCTIONS_SETUP.md](CLOUD_FUNCTIONS_SETUP.md) - How to set up Cloud Functions
+- [FIREBASE_SETUP.md](FIREBASE_SETUP.md) - Firebase configuration guide
+
+### Quick Security Check
+
+To verify your deployment is secure:
+```bash
+# Build your app
+npm run build
+
+# Search for exposed keys (should find none)
+grep -r "gsk_" build/
+```
+
 ## Contributing
 
- 
+
 
 This is a personal project, but suggestions and feedback are welcome! Please open an issue to discuss proposed changes.
 
