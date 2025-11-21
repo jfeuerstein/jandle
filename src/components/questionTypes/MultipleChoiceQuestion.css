@@ -1,0 +1,99 @@
+.multiple-choice-question {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.multiple-choice-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.multiple-choice-option {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.multiple-choice-option:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.multiple-choice-option.selected {
+  border-color: var(--color-aim-purple);
+  background: rgba(51, 153, 255, 0.1);
+  color: var(--color-aim-purple);
+}
+
+.multiple-choice-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-letter {
+  font-weight: bold;
+  color: var(--color-aim-yellow);
+  min-width: 20px;
+}
+
+.multiple-choice-option.selected .option-letter {
+  color: var(--color-aim-purple);
+}
+
+.option-text {
+  flex: 1;
+}
+
+.multiple-choice-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.multiple-choice-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.multiple-choice-btn:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.multiple-choice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.multiple-choice-btn-submit:hover:not(:disabled) {
+  border-color: var(--color-aim-purple);
+  color: var(--color-aim-purple);
+}
+
+.multiple-choice-btn-skip {
+  color: var(--text-secondary);
+}
+
+.multiple-choice-btn-skip:hover:not(:disabled) {
+  border-color: var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+}

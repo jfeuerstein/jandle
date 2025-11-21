@@ -15,9 +15,10 @@ export const useApp = () => {
 
 // Fallback questions if LLM generation fails
 const FALLBACK_QUESTIONS = [
-  { id: 1, text: 'what is your earliest childhood memory?' },
-  { id: 2, text: 'if you could have dinner with anyone dead or alive, who would it be?' },
-  { id: 3, text: 'what song would you want played at your funeral?' },
+  { id: 1, type: 'long_form', text: 'what is your earliest childhood memory?' },
+  { id: 2, type: 'long_form', text: 'if you could have dinner with anyone dead or alive, who would it be?' },
+  { id: 3, type: 'yes_no', text: 'do you believe in love at first sight?' },
+  { id: 4, type: 'multiple_choice', text: 'how do you prefer to spend your free time?', options: ['reading or learning', 'being active or outdoors', 'socializing with friends', 'relaxing at home'] },
 ];
 
 export const AppProvider = ({ children }) => {
@@ -132,14 +133,17 @@ export const AppProvider = ({ children }) => {
     setCurrentPage(page);
   };
 
-  const answerQuestion = async (questionId, questionText, answer) => {
+  const answerQuestion = async (questionId, questionText, answer, questionType, questionData) => {
     const otherUser = currentUser === 'josh' ? 'nini' : 'josh';
 
     try {
-      // Add to other user's inbox in Firebase
+      // Add to other user's inbox in Firebase with question type data
       const newInboxItem = {
         questionId,
         questionText,
+        questionType: questionType || 'long_form',
+        questionOptions: questionData?.options,
+        questionScenario: questionData?.scenario,
         otherUserAnswer: answer,
         answeredBy: currentUser
       };

@@ -1,0 +1,62 @@
+.yes-no-question {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.question-type-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  border: 1px solid var(--text-secondary);
+  border-radius: 2px;
+}
+
+.yes-no-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.yes-no-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.yes-no-btn:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.yes-no-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.yes-no-btn-yes:hover:not(:disabled) {
+  border-color: #4ade80;
+  color: #4ade80;
+}
+
+.yes-no-btn-no:hover:not(:disabled) {
+  border-color: #f87171;
+  color: #f87171;
+}
+
+.yes-no-btn-skip {
+  color: var(--text-secondary);
+}
+
+.yes-no-btn-skip:hover:not(:disabled) {
+  border-color: var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+}
