@@ -3,11 +3,35 @@ import { useApp } from '../AppContext';
 import './Questions.css';
 
 function Questions() {
-  const { getCurrentQuestion, answerQuestion, skipQuestion } = useApp();
+  const { getCurrentQuestion, answerQuestion, skipQuestion, questionsLoading } = useApp();
   const [answer, setAnswer] = useState('');
   const [showInput, setShowInput] = useState(false);
 
   const currentQuestion = getCurrentQuestion();
+
+  // Show loading state while questions are being generated
+  if (questionsLoading) {
+    return (
+      <div className="questions-page">
+        <div className="questions-container">
+          <div className="question-card">
+            <pre className="question-empty-art">
+{`┌──────────────────────────────┐
+│                              │
+│   generating questions...    │
+│                              │
+│      powered by groq llm     │
+│                              │
+└──────────────────────────────┘`}
+            </pre>
+            <p className="question-empty-message">
+              creating unique questions just for you
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleAnswer = () => {
     if (answer.trim()) {
