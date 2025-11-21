@@ -75,7 +75,19 @@ export const AppProvider = ({ children }) => {
 
     const unsubscribeAnswers = onValue(answersRef, (snapshot) => {
       if (snapshot.exists()) {
-        setAnswers(snapshot.val());
+        const answersData = snapshot.val();
+        // Ensure all answer objects have a messages array
+        const normalizedAnswers = {
+          josh: (answersData.josh || []).map(answer => ({
+            ...answer,
+            messages: answer.messages || []
+          })),
+          nini: (answersData.nini || []).map(answer => ({
+            ...answer,
+            messages: answer.messages || []
+          }))
+        };
+        setAnswers(normalizedAnswers);
       }
     });
 
@@ -160,12 +172,12 @@ export const AppProvider = ({ children }) => {
       // Update answers for both users in Firebase
       const updatedJoshAnswers = answers.josh.map(item =>
         item.questionId === questionId
-          ? { ...item, messages: [...item.messages, newMessage] }
+          ? { ...item, messages: [...(item.messages || []), newMessage] }
           : item
       );
       const updatedNiniAnswers = answers.nini.map(item =>
         item.questionId === questionId
-          ? { ...item, messages: [...item.messages, newMessage] }
+          ? { ...item, messages: [...(item.messages || []), newMessage] }
           : item
       );
 
