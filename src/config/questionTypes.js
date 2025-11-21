@@ -25,7 +25,16 @@ export const QUESTION_TYPES = {
     userPrompt: (count) => `Generate ${count} unique multiple choice questions for couples. Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format: [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...]. No other text, just the JSON array.`,
     validationRequired: true
   },
-
+  SHORT_FORM: {
+    id: 'short_form',
+    name: 'Short-Form Question',
+    description: 'Short questions requiring brief, thoughtful responses',
+    responseOptions: null, // Free-form text response
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. Generate questions that enable short responses that will lead to meaningful conversations. These should encourage short, thoughtful responses.`,
+    userPrompt: (count) => `Generate ${count} unique questions for couples that require a short, thoughtful response (1-2 sentences). Return ONLY a JSON array in this exact format: [{"question": "What is your favorite memory together?"}, ...]. No other text, just the JSON array.`,
+    validationRequired: false,
+    hasScenario: true
+  },
   LONG_FORM: {
     id: 'long_form',
     name: 'Long-Form Story',
