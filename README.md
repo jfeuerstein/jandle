@@ -130,9 +130,15 @@ Jandle creates a unique conversation experience where users answer questions ind
 
  
 
-### Phase 5: Future Enhancements 🔮
+### Phase 5: Firebase Integration ✅
 
-- [ ] Persistent storage (localStorage or backend API)
+- [x] Firebase Realtime Database integration
+- [x] Persistent storage across sessions
+- [x] Real-time data synchronization between users
+
+### Phase 6: Future Enhancements 🔮
+
+- [ ] Firebase Authentication for user login
 
 - [ ] Question generation algorithm
 
@@ -194,11 +200,13 @@ Jandle follows the **Josh-thetic** design principles:
 
 ## Tech Stack
 
- 
+
 
 - **React 19.2** - UI framework
 
 - **React Context API** - State management
+
+- **Firebase Realtime Database** - Data persistence and real-time sync
 
 - **CSS3** - Styling with custom properties
 
@@ -220,7 +228,7 @@ Jandle follows the **Josh-thetic** design principles:
 
 ### Installation
 
- 
+
 
 ```bash
 
@@ -228,19 +236,38 @@ Jandle follows the **Josh-thetic** design principles:
 
 git clone https://github.com/jfeuerstein/jandle.git
 
- 
+
 
 # Navigate to project directory
 
 cd jandle
 
- 
+
 
 # Install dependencies
 
 npm install
 
- 
+```
+
+
+
+### Firebase Setup
+
+Before running the app, you need to set up Firebase:
+
+1. Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Realtime Database
+3. Copy your Firebase configuration
+4. Update `src/firebase.js` with your actual Firebase credentials
+
+See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for detailed setup instructions.
+
+
+
+### Running the App
+
+```bash
 
 # Start development server
 
@@ -248,7 +275,7 @@ npm start
 
 ```
 
- 
+
 
 The app will open at `http://localhost:3000`
 
@@ -316,11 +343,11 @@ jandle/
 
 ## State Management
 
- 
 
-The app uses React Context API to manage:
 
- 
+The app uses React Context API with Firebase Realtime Database for persistent storage:
+
+
 
 - **Current user** - Which user is viewing the app (Josh or Nini)
 
@@ -328,17 +355,17 @@ The app uses React Context API to manage:
 
 - **Questions pool** - Available questions to answer
 
-- **Question index** - Current position in question flow per user
+- **Question index** - Current position in question flow per user (stored in Firebase)
 
-- **Inbox** - Questions waiting for user's response
+- **Inbox** - Questions waiting for user's response (stored in Firebase)
 
-- **Answers** - Completed question pairs with chat threads
+- **Answers** - Completed question pairs with chat threads (stored in Firebase)
 
- 
 
-### Data Flow
 
- 
+### Data Flow with Firebase
+
+
 
 ```javascript
 
@@ -346,30 +373,51 @@ The app uses React Context API to manage:
 
 answerQuestion(questionId, questionText, answer)
 
-  → Adds to other user's inbox
+  → Writes to other user's inbox in Firebase
 
- 
+  → Real-time sync updates other user's view
+
+
 
 // User answers inbox question
 
 answerInboxQuestion(inboxItem, answer)
 
-  → Removes from inbox
+  → Removes from inbox in Firebase
 
-  → Creates answer pair for both users
+  → Creates answer pair for both users in Firebase
 
-  → Unlocks chat thread
+  → Unlocks chat thread for both users
 
- 
+
 
 // User sends chat message
 
 sendMessage(questionId, message)
 
-  → Adds to conversation thread
+  → Adds to conversation thread in Firebase
 
-  → Visible to both users
+  → Real-time sync shows message to both users instantly
 
+```
+
+
+
+### Firebase Data Structure
+
+
+
+```
+jandle-app/
+├── questionIndex/
+│   ├── josh: 0
+│   └── nini: 0
+├── inbox/
+│   ├── josh: [...]
+│   └── nini: [...]
+└── answers/
+    ├── josh: [...]
+    └── nini: [...]
 ```
 
  
