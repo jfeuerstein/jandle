@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import QuestionRenderer from './QuestionRenderer';
 import './Inbox.css';
 
 function Inbox() {
-  const { currentUser, inbox, answerInboxQuestion } = useApp();
+  const { currentUser, inbox, answerInboxQuestion, questionsPool } = useApp();
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [answer, setAnswer] = useState('');
 
@@ -14,8 +15,26 @@ function Inbox() {
     setAnswer('');
   };
 
+  // Helper to check if answer is valid
+  const isAnswerValid = () => {
+    if (!answer) return false;
+
+    // For string answers
+    if (typeof answer === 'string') {
+      return answer.trim().length > 0;
+    }
+
+    // For object answers (yes/no, multiple choice with elaboration)
+    if (typeof answer === 'object') {
+      // Must have a choice
+      return answer.choice !== undefined && answer.choice !== '';
+    }
+
+    return false;
+  };
+
   const handleSubmitAnswer = () => {
-    if (answer.trim() && selectedQuestion) {
+    if (isAnswerValid() && selectedQuestion) {
       answerInboxQuestion(selectedQuestion, answer);
       setSelectedQuestion(null);
       setAnswer('');
@@ -25,6 +44,11 @@ function Inbox() {
   const handleCancel = () => {
     setSelectedQuestion(null);
     setAnswer('');
+  };
+
+  // Get the full question object from the pool
+  const getQuestionFromPool = (questionId) => {
+    return questionsPool.find(q => q.id === questionId);
   };
 
   if (userInbox.length === 0) {
@@ -108,13 +132,10 @@ function Inbox() {
 
               <div className="inbox-answer-form">
                 <label className="inbox-answer-label">your answer:</label>
-                <textarea
-                  className="inbox-textarea"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  placeholder="type your answer here..."
-                  rows="6"
-                  autoFocus
+                <QuestionRenderer
+                  question={getQuestionFromPool(selectedQuestion.questionId)}
+                  answer={answer}
+                  onAnswerChange={setAnswer}
                 />
                 <div className="inbox-answer-actions">
                   <button
@@ -126,7 +147,7 @@ function Inbox() {
                   <button
                     className="inbox-btn inbox-btn-submit"
                     onClick={handleSubmitAnswer}
-                    disabled={!answer.trim()}
+                    disabled={!isAnswerValid()}
                   >
                     [ submit & unlock ]
                   </button>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { QUESTION_TYPES } from './questionTypes';
 
 const AppContext = createContext();
 
@@ -16,9 +17,87 @@ export const AppProvider = ({ children }) => {
 
   // Questions pool - these will be shown one at a time
   const [questionsPool] = useState([
-    { id: 1, text: 'what is your earliest childhood memory?' },
-    { id: 2, text: 'if you could have dinner with anyone dead or alive, who would it be?' },
-    { id: 3, text: 'what song would you want played at your funeral?' },
+    {
+      id: 1,
+      type: QUESTION_TYPES.FREE_RESPONSE,
+      text: 'what is your earliest childhood memory?'
+    },
+    {
+      id: 2,
+      type: QUESTION_TYPES.YES_NO,
+      text: 'do you believe in soulmates?'
+    },
+    {
+      id: 3,
+      type: QUESTION_TYPES.MULTIPLE_CHOICE,
+      text: 'which superpower would you choose?',
+      options: [
+        'flying',
+        'invisibility',
+        'time travel',
+        'reading minds',
+        'teleportation'
+      ]
+    },
+    {
+      id: 4,
+      type: QUESTION_TYPES.LONG_FORM,
+      text: 'what would you do in this situation?',
+      story: `you're at a coffee shop when you overhear someone at the next table sharing deeply personal information about a mutual friend. the information is something your friend explicitly told you in confidence.
+
+the person talking doesn't know you're there. your friend would be devastated to know this is being shared.
+
+what do you do?`
+    },
+    {
+      id: 5,
+      type: QUESTION_TYPES.FREE_RESPONSE,
+      text: 'if you could have dinner with anyone dead or alive, who would it be?'
+    },
+    {
+      id: 6,
+      type: QUESTION_TYPES.MULTIPLE_CHOICE,
+      text: 'what\'s your ideal way to spend a sunday morning?',
+      options: [
+        'sleeping in until noon',
+        'early morning workout',
+        'breakfast with friends',
+        'reading in bed',
+        'getting work done while it\'s quiet'
+      ]
+    },
+    {
+      id: 7,
+      type: QUESTION_TYPES.YES_NO,
+      text: 'would you rather know when you\'re going to die or how you\'re going to die?'
+    },
+    {
+      id: 8,
+      type: QUESTION_TYPES.LONG_FORM,
+      text: 'how would you handle this dilemma?',
+      story: `you've been offered your dream job in a city across the country. the salary is incredible, the role is perfect, and it's the opportunity you've been working toward for years.
+
+but your best friend is going through the hardest time of their life right now and has told you that having you nearby is one of the few things keeping them going.
+
+the job offer expires in 48 hours.`
+    },
+    {
+      id: 9,
+      type: QUESTION_TYPES.FREE_RESPONSE,
+      text: 'what song would you want played at your funeral?'
+    },
+    {
+      id: 10,
+      type: QUESTION_TYPES.MULTIPLE_CHOICE,
+      text: 'if you had to give up one forever, which would it be?',
+      options: [
+        'music',
+        'movies & tv',
+        'books',
+        'video games',
+        'social media'
+      ]
+    }
   ]);
 
   // Track current question index for each user

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import QuestionRenderer from './QuestionRenderer';
 import './Questions.css';
 
 function Questions() {
@@ -9,8 +10,26 @@ function Questions() {
 
   const currentQuestion = getCurrentQuestion();
 
+  // Helper to check if answer is valid
+  const isAnswerValid = () => {
+    if (!answer) return false;
+
+    // For string answers
+    if (typeof answer === 'string') {
+      return answer.trim().length > 0;
+    }
+
+    // For object answers (yes/no, multiple choice with elaboration)
+    if (typeof answer === 'object') {
+      // Must have a choice
+      return answer.choice !== undefined && answer.choice !== '';
+    }
+
+    return false;
+  };
+
   const handleAnswer = () => {
-    if (answer.trim()) {
+    if (isAnswerValid()) {
       answerQuestion(currentQuestion.id, currentQuestion.text, answer);
       setAnswer('');
       setShowInput(false);
@@ -80,13 +99,10 @@ function Questions() {
             </div>
           ) : (
             <div className="question-answer-form">
-              <textarea
-                className="question-textarea"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder="type your answer here..."
-                rows="6"
-                autoFocus
+              <QuestionRenderer
+                question={currentQuestion}
+                answer={answer}
+                onAnswerChange={setAnswer}
               />
               <div className="question-actions">
                 <button
@@ -101,7 +117,7 @@ function Questions() {
                 <button
                   className="question-btn question-btn-submit"
                   onClick={handleAnswer}
-                  disabled={!answer.trim()}
+                  disabled={!isAnswerValid()}
                 >
                   [ submit ]
                 </button>

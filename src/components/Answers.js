@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import AnswerDisplay from './AnswerDisplay';
 import './Answers.css';
 
 function Answers() {
@@ -111,7 +112,7 @@ function Answers() {
                 <span className="chat-message-user">josh</span>
               </div>
               <div className="chat-message-content">
-                {selectedAnswer.joshAnswer}
+                <AnswerDisplay answer={selectedAnswer.joshAnswer} />
               </div>
             </div>
 
@@ -120,7 +121,7 @@ function Answers() {
                 <span className="chat-message-user">nini</span>
               </div>
               <div className="chat-message-content">
-                {selectedAnswer.niniAnswer}
+                <AnswerDisplay answer={selectedAnswer.niniAnswer} />
               </div>
             </div>
 

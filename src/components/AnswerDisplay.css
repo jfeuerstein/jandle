@@ -1,0 +1,52 @@
+/* Answer Display Styles */
+
+.answer-display-text {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.answer-display-complex {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.answer-display-choice {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.answer-display-choice-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.answer-display-choice-value {
+  color: var(--color-aim-yellow);
+  font-weight: bold;
+}
+
+.answer-display-elaboration {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 0.5rem;
+  border-left: 2px solid #333;
+}
+
+.answer-display-elaboration-label {
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.answer-display-elaboration-text {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
