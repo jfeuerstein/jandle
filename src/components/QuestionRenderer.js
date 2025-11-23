@@ -1,6 +1,7 @@
 import React from 'react';
 import YesNoQuestion from './questionTypes/YesNoQuestion';
 import MultipleChoiceQuestion from './questionTypes/MultipleChoiceQuestion';
+import RankingQuestion from './questionTypes/RankingQuestion';
 import ShortFormQuestion from './questionTypes/ShortFormQuestion';
 import LongFormQuestion from './questionTypes/LongFormQuestion';
 
@@ -39,6 +40,16 @@ function QuestionRenderer({ question, onAnswer, onSkip, disabled = false, mode =
     case 'multiple_choice':
       return (
         <MultipleChoiceQuestion
+          question={question}
+          onAnswer={onAnswer}
+          onSkip={onSkip}
+          disabled={disabled}
+        />
+      );
+
+    case 'ranking':
+      return (
+        <RankingQuestion
           question={question}
           onAnswer={onAnswer}
           onSkip={onSkip}

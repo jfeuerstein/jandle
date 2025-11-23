@@ -28,14 +28,26 @@ const QUESTION_TYPES = {
   },
   MULTIPLE_CHOICE: {
     id: "multiple_choice",
-    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. 
-    Generate multiple choice questions that are intimate, personal, and promote meaningful conversations. 
-    Each question should have 3-4 interesting answer options that reveal something about the person's values, 
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples.
+    Generate multiple choice questions that are intimate, personal, and promote meaningful conversations.
+    Each question should have 3-4 interesting answer options that reveal something about the person's values,
     preferences, or perspectives.`,
     userPrompt: (count) =>
-      `Generate ${count} unique multiple choice questions for couples. 
-    Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format: 
-    [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...]. 
+      `Generate ${count} unique multiple choice questions for couples.
+    Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format:
+    [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...].
+    No other text, just the JSON array.`,
+  },
+  RANKING: {
+    id: "ranking",
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples.
+    Generate ranking questions that are intimate, personal, and promote meaningful conversations.
+    Each question should provide 4-6 items that the person must rank in order of preference, importance, or priority.
+    The items should be interesting and reveal something about the person's values, priorities, or perspectives.`,
+    userPrompt: (count) =>
+      `Generate ${count} unique ranking questions for couples.
+    Each question should have 4-6 items to be ranked in order. Return ONLY a JSON array in this exact format:
+    [{"question": "Rank these relationship priorities:", "items": ["item 1", "item 2", "item 3", "item 4"]}, ...].
     No other text, just the JSON array.`,
   },
   LONG_FORM: {
