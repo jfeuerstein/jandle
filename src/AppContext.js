@@ -88,7 +88,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     const generateMoreQuestions = async () => {
       // Don't generate if we're already generating or still loading initial questions
-      if (isGeneratingMore || questionsLoading || questionsPool.length === 0) {
+      if (isGeneratingMore || questionsLoading) {
         return;
       }
 
@@ -98,13 +98,16 @@ export const AppProvider = ({ children }) => {
       // Trigger generation when within 3 questions of running out
       const threshold = questionsPool.length - 3;
 
-      if (maxIndex >= threshold) {
+      if (questionsPool.length > 0 && maxIndex >= threshold) {
         setIsGeneratingMore(true);
         try {
           console.log('Running low on questions, generating more...');
           const newQuestions = await generateQuestions(10);
-          setQuestionsPool(prevPool => [...prevPool, ...newQuestions]);
-          console.log(`Added ${newQuestions.length} new questions. Total: ${questionsPool.length + newQuestions.length}`);
+          setQuestionsPool(prevPool => {
+            const updatedPool = [...prevPool, ...newQuestions];
+            console.log(`Added ${newQuestions.length} new questions. Total: ${updatedPool.length}`);
+            return updatedPool;
+          });
         } catch (error) {
           console.error('Failed to generate more questions:', error);
         } finally {
@@ -114,7 +117,7 @@ export const AppProvider = ({ children }) => {
     };
 
     generateMoreQuestions();
-  }, [questionIndex, questionsPool.length, questionsLoading, isGeneratingMore]);
+  }, [questionIndex, questionsLoading, isGeneratingMore]);
 
   // Request notification permission on mount
   useEffect(() => {

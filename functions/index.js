@@ -50,17 +50,27 @@ const QUESTION_TYPES = {
     [{"question": "Rank these relationship priorities:", "items": ["item 1", "item 2", "item 3", "item 4"]}, ...].
     No other text, just the JSON array.`,
   },
+  SHORT_FORM: {
+    id: "short_form",
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples.
+    Generate questions that enable short responses that will lead to meaningful conversations.
+    These should encourage short, thoughtful responses.`,
+    userPrompt: (count) =>
+      `Generate ${count} unique questions for couples that require a short, thoughtful response (1-2 sentences).
+    Return ONLY a JSON array in this exact format: [{"question": "What is your favorite memory together?"}, ...].
+    No other text, just the JSON array.`,
+  },
   LONG_FORM: {
     id: "long_form",
-    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. 
-    Generate questions that include a brief scenario or story (2-3 sentences) 
-    followed by an open-ended question that asks for the person's opinion, reaction, or perspective on the scenario. 
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples.
+    Generate questions that include a brief scenario or story (2-3 sentences)
+    followed by an open-ended question that asks for the person's opinion, reaction, or perspective on the scenario.
     These should encourage detailed, thoughtful responses.`,
     userPrompt: (count) =>
-      `Generate ${count} unique scenario-based questions for couples. 
-    Each should include a brief story or scenario (2-3 sentences) followed by a question asking for their opinion. 
-    Return ONLY a JSON array in this exact format: 
-    [{"scenario": "A brief scenario description...", "question": "What would you do?"}, ...]. 
+      `Generate ${count} unique scenario-based questions for couples.
+    Each should include a brief story or scenario (2-3 sentences) followed by a question asking for their opinion.
+    Return ONLY a JSON array in this exact format:
+    [{"scenario": "A brief scenario description...", "question": "What would you do?"}, ...].
     No other text, just the JSON array.`,
   },
 };

@@ -59,20 +59,24 @@ const generateByType = async (questionType, count) => {
  */
 export const generateQuestions = async (count = 10) => {
   try {
-    // Distribute questions across different types
-    const questionsPerType = Math.floor(count / 3);
-    const remainder = count % 3;
+    // Distribute questions across all 5 types
+    const questionsPerType = Math.floor(count / 5);
+    const remainder = count % 5;
 
     const yesNoCount = questionsPerType + (remainder > 0 ? 1 : 0);
     const multipleChoiceCount = questionsPerType + (remainder > 1 ? 1 : 0);
+    const rankingCount = questionsPerType + (remainder > 2 ? 1 : 0);
+    const shortFormCount = questionsPerType + (remainder > 3 ? 1 : 0);
     const longFormCount = questionsPerType;
 
-    console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${longFormCount} long-form questions`);
+    console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${rankingCount} ranking, ${shortFormCount} short-form, ${longFormCount} long-form questions`);
 
     // Generate questions for each type in parallel
-    const [yesNoQuestions, multipleChoiceQuestions, longFormQuestions] = await Promise.all([
+    const [yesNoQuestions, multipleChoiceQuestions, rankingQuestions, shortFormQuestions, longFormQuestions] = await Promise.all([
       generateByType(QUESTION_TYPES.YES_NO, yesNoCount),
       generateByType(QUESTION_TYPES.MULTIPLE_CHOICE, multipleChoiceCount),
+      generateByType(QUESTION_TYPES.RANKING, rankingCount),
+      generateByType(QUESTION_TYPES.SHORT_FORM, shortFormCount),
       generateByType(QUESTION_TYPES.LONG_FORM, longFormCount)
     ]);
 
@@ -96,6 +100,25 @@ export const generateQuestions = async (count = 10) => {
         type: 'multiple_choice',
         text: q.question.toLowerCase().trim(),
         options: q.options
+      });
+    });
+
+    // Ranking questions
+    rankingQuestions.forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'ranking',
+        text: q.question.toLowerCase().trim(),
+        items: q.items
+      });
+    });
+
+    // Short-form questions
+    shortFormQuestions.forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'short_form',
+        text: q.question.toLowerCase().trim()
       });
     });
 
@@ -144,6 +167,19 @@ export const generateSingleQuestion = async () => {
       type: 'multiple_choice',
       text: question.question.toLowerCase().trim(),
       options: question.options
+    };
+  } else if (questionType.id === 'ranking') {
+    return {
+      id: Date.now(),
+      type: 'ranking',
+      text: question.question.toLowerCase().trim(),
+      items: question.items
+    };
+  } else if (questionType.id === 'short_form') {
+    return {
+      id: Date.now(),
+      type: 'short_form',
+      text: question.question.toLowerCase().trim()
     };
   } else if (questionType.id === 'long_form') {
     return {
