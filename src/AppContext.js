@@ -93,6 +93,10 @@ export const AppProvider = ({ children }) => {
       }
 
       // Find the highest question index across both users
+      // Safety check: ensure questionIndex has both user properties
+      if (!questionIndex || questionIndex.josh === undefined || questionIndex.nini === undefined) {
+        return;
+      }
       const maxIndex = Math.max(questionIndex.josh, questionIndex.nini);
 
       // Trigger generation when within 3 questions of running out
