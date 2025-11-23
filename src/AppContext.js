@@ -61,6 +61,10 @@ export const AppProvider = ({ children }) => {
   // Format: { josh: [{questionId, questionText, joshAnswer, niniAnswer, messages: []}], nini: [...] }
   const [answers, setAnswers] = useState({ josh: [], nini: [] });
 
+  // Viewed status: tracks what each user has viewed
+  // Format: { josh: { questionId: { lastViewed: timestamp, lastMessageCount: number } }, nini: {...} }
+  const [viewedStatus, setViewedStatus] = useState({ josh: {}, nini: {} });
+
   // Generate questions on mount using LLM
   useEffect(() => {
     const loadQuestions = async () => {
@@ -112,6 +116,79 @@ export const AppProvider = ({ children }) => {
     generateMoreQuestions();
   }, [questionIndex, questionsPool.length, questionsLoading, isGeneratingMore]);
 
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Track previous state for notifications
+  const prevInboxRef = React.useRef(inbox);
+  const prevAnswersRef = React.useRef(answers);
+
+  // Notification system: detect new inbox items
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const prevInboxCount = prevInboxRef.current[currentUser]?.length || 0;
+    const currentInboxCount = inbox[currentUser]?.length || 0;
+
+    if (currentInboxCount > prevInboxCount) {
+      const newItems = currentInboxCount - prevInboxCount;
+      showNotification(
+        'New Inbox Question!',
+        `You have ${newItems} new question${newItems > 1 ? 's' : ''} to answer`
+      );
+    }
+
+    prevInboxRef.current = inbox;
+  }, [inbox, currentUser]);
+
+  // Notification system: detect new answers and new chat messages
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const prevAnswers = prevAnswersRef.current[currentUser] || [];
+    const currentAnswers = answers[currentUser] || [];
+
+    // Check for new answers
+    const prevAnswerIds = new Set(prevAnswers.map(a => a.questionId));
+    const newAnswers = currentAnswers.filter(a => !prevAnswerIds.has(a.questionId));
+
+    if (newAnswers.length > 0) {
+      showNotification(
+        'New Answer Available!',
+        `${newAnswers.length} new conversation${newAnswers.length > 1 ? 's' : ''} unlocked`
+      );
+    }
+
+    // Check for new chat messages
+    currentAnswers.forEach(answer => {
+      const prevAnswer = prevAnswers.find(a => a.questionId === answer.questionId);
+      if (!prevAnswer) return; // Skip if it's a new answer (already notified above)
+
+      const prevMessageCount = prevAnswer.messages?.length || 0;
+      const currentMessageCount = answer.messages?.length || 0;
+
+      if (currentMessageCount > prevMessageCount) {
+        const newMessages = answer.messages.slice(prevMessageCount);
+        // Only notify if the new message is from the other user
+        const otherUser = currentUser === 'josh' ? 'nini' : 'josh';
+        const hasNewMessageFromOther = newMessages.some(msg => msg.user === otherUser);
+
+        if (hasNewMessageFromOther) {
+          showNotification(
+            'New Chat Message!',
+            `New message in: "${answer.questionText.slice(0, 50)}..."`
+          );
+        }
+      }
+    });
+
+    prevAnswersRef.current = answers;
+  }, [answers, currentUser]);
+
   // Initialize Firebase data and set up listeners
   useEffect(() => {
     const initializeData = async () => {
@@ -124,7 +201,8 @@ export const AppProvider = ({ children }) => {
           await set(dataRef, {
             questionIndex: { josh: 0, nini: 0 },
             inbox: { josh: [], nini: [] },
-            answers: { josh: [], nini: [] }
+            answers: { josh: [], nini: [] },
+            viewedStatus: { josh: {}, nini: {} }
           });
         }
       } catch (error) {
@@ -138,6 +216,7 @@ export const AppProvider = ({ children }) => {
     const questionIndexRef = ref(database, 'questionIndex');
     const inboxRef = ref(database, 'inbox');
     const answersRef = ref(database, 'answers');
+    const viewedStatusRef = ref(database, 'viewedStatus');
 
     const unsubscribeQuestionIndex = onValue(questionIndexRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -174,11 +253,18 @@ export const AppProvider = ({ children }) => {
       }
     });
 
+    const unsubscribeViewedStatus = onValue(viewedStatusRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setViewedStatus(snapshot.val());
+      }
+    });
+
     // Cleanup listeners on unmount
     return () => {
       unsubscribeQuestionIndex();
       unsubscribeInbox();
       unsubscribeAnswers();
+      unsubscribeViewedStatus();
     };
   }, []);
 
@@ -298,6 +384,37 @@ export const AppProvider = ({ children }) => {
     return questionsPool[index];
   };
 
+  const markAnswerAsViewed = async (questionId) => {
+    if (!currentUser) return;
+
+    try {
+      const answer = answers[currentUser]?.find(a => a.questionId === questionId);
+      if (!answer) return;
+
+      const messageCount = answer.messages?.length || 0;
+      const updatedViewedStatus = {
+        ...viewedStatus,
+        [currentUser]: {
+          ...(viewedStatus[currentUser] || {}),
+          [questionId]: {
+            lastViewed: Date.now(),
+            lastMessageCount: messageCount
+          }
+        }
+      };
+
+      await set(ref(database, 'viewedStatus'), updatedViewedStatus);
+    } catch (error) {
+      console.error('Error marking answer as viewed:', error);
+    }
+  };
+
+  const showNotification = (title, body) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/favicon.ico' });
+    }
+  };
+
   const value = {
     currentUser,
     currentPage,
@@ -309,11 +426,13 @@ export const AppProvider = ({ children }) => {
     questionIndex,
     inbox,
     answers,
+    viewedStatus,
     answerQuestion,
     skipQuestion,
     answerInboxQuestion,
     sendMessage,
-    getCurrentQuestion
+    getCurrentQuestion,
+    markAnswerAsViewed
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

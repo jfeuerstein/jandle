@@ -3,10 +3,23 @@ import { useApp } from '../AppContext';
 import './Navigation.css';
 
 function Navigation() {
-  const { currentUser, currentPage, switchPage, inbox, answers } = useApp();
+  const { currentUser, currentPage, switchPage, inbox, answers, viewedStatus } = useApp();
 
   const inboxCount = inbox[currentUser]?.length || 0;
-  const answersCount = answers[currentUser]?.length || 0;
+
+  // Calculate unviewed answers count (new answers or answers with new messages)
+  const userAnswers = answers[currentUser] || [];
+  const userViewedStatus = viewedStatus[currentUser] || {};
+
+  const unviewedCount = userAnswers.filter(answer => {
+    const viewed = userViewedStatus[answer.questionId];
+    if (!viewed) return true; // Never viewed = unviewed
+
+    const currentMessageCount = answer.messages?.length || 0;
+    const lastViewedMessageCount = viewed.lastMessageCount || 0;
+
+    return currentMessageCount > lastViewedMessageCount; // Has new messages
+  }).length;
 
   return (
     <nav className="navigation">
@@ -37,7 +50,7 @@ function Navigation() {
             className={`nav-btn ${currentPage === 'answers' ? 'active' : ''}`}
             onClick={() => switchPage('answers')}
           >
-            [ answers {answersCount > 0 && `(${answersCount})`} ]
+            [ answers {unviewedCount > 0 && `(${unviewedCount})`} ]
           </button>
         </div>
       </div>

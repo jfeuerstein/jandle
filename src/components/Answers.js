@@ -3,11 +3,43 @@ import { useApp } from '../AppContext';
 import './Answers.css';
 
 function Answers() {
-  const { currentUser, answers, sendMessage } = useApp();
+  const { currentUser, answers, sendMessage, viewedStatus, markAnswerAsViewed } = useApp();
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [message, setMessage] = useState('');
 
   const userAnswers = answers[currentUser] || [];
+  const userViewedStatus = viewedStatus[currentUser] || {};
+
+  // Helper function to check if an answer is new or has new messages
+  const isAnswerUnviewed = (answer) => {
+    const viewed = userViewedStatus[answer.questionId];
+    if (!viewed) return true; // Never viewed
+
+    const currentMessageCount = answer.messages?.length || 0;
+    const lastViewedMessageCount = viewed.lastMessageCount || 0;
+
+    return currentMessageCount > lastViewedMessageCount;
+  };
+
+  // Sort answers: unviewed first, then by most recent message/creation
+  const sortedAnswers = [...userAnswers].sort((a, b) => {
+    const aUnviewed = isAnswerUnviewed(a);
+    const bUnviewed = isAnswerUnviewed(b);
+
+    // Unviewed items come first
+    if (aUnviewed && !bUnviewed) return -1;
+    if (!aUnviewed && bUnviewed) return 1;
+
+    // Within each group, sort by most recent activity (last message timestamp or creation)
+    const aLastActivity = a.messages?.length > 0
+      ? a.messages[a.messages.length - 1].timestamp
+      : a.questionId; // Use questionId as proxy for creation time
+    const bLastActivity = b.messages?.length > 0
+      ? b.messages[b.messages.length - 1].timestamp
+      : b.questionId;
+
+    return bLastActivity - aLastActivity; // Most recent first
+  });
 
   // ref for scrolling to the bottom of the messages
   const messagesEndRef = useRef(null);
@@ -41,6 +73,8 @@ function Answers() {
   const handleSelectAnswer = (answer) => {
     setSelectedAnswer(answer);
     setMessage('');
+    // Mark as viewed when opened
+    markAnswerAsViewed(answer.questionId);
   };
 
   const handleSendMessage = () => {
@@ -91,25 +125,29 @@ function Answers() {
           </div>
 
           <div className="answers-list">
-            {userAnswers.map((answer, index) => (
-              <div
-                key={answer.questionId}
-                className="answer-item"
-                onClick={() => handleSelectAnswer(answer)}
-              >
-                <div className="answer-item-question">
-                  {answer.questionText}
+            {sortedAnswers.map((answer) => {
+              const unviewed = isAnswerUnviewed(answer);
+              return (
+                <div
+                  key={answer.questionId}
+                  className={`answer-item ${unviewed ? 'answer-item-unviewed' : ''}`}
+                  onClick={() => handleSelectAnswer(answer)}
+                >
+                  <div className="answer-item-question">
+                    {unviewed && <span className="unviewed-indicator">● </span>}
+                    {answer.questionText}
+                  </div>
+                  <div className="answer-item-footer">
+                    <span className="answer-item-messages">
+                      {(answer.messages && answer.messages.length > 0)
+                        ? `${answer.messages.length} message${answer.messages.length !== 1 ? 's' : ''}`
+                        : 'no messages yet'}
+                    </span>
+                    <span className="answer-item-action">[ view chat ]</span>
+                  </div>
                 </div>
-                <div className="answer-item-footer">
-                  <span className="answer-item-messages">
-                    {(answer.messages && answer.messages.length > 0)
-                      ? `${answer.messages.length} message${answer.messages.length !== 1 ? 's' : ''}`
-                      : 'no messages yet'}
-                  </span>
-                  <span className="answer-item-action">[ view chat ]</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
