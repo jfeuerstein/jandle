@@ -25,6 +25,17 @@ export const QUESTION_TYPES = {
     userPrompt: (count) => `Generate ${count} unique multiple choice questions for couples. Each question should have 3-4 answer options. Return ONLY a JSON array in this exact format: [{"question": "question text?", "options": ["option 1", "option 2", "option 3"]}, ...]. No other text, just the JSON array.`,
     validationRequired: true
   },
+
+  RANKING: {
+    id: 'ranking',
+    name: 'Ranking',
+    description: 'Questions where you rank options in order of preference',
+    responseOptions: null, // Options are generated per question
+    prompt: `You are a relationship expert who creates deep, thought-provoking questions for couples. Generate ranking questions that are intimate, personal, and promote meaningful conversations. Each question should provide 4-6 items that the person must rank in order of preference, importance, or priority. The items should be interesting and reveal something about the person's values, priorities, or perspectives.`,
+    userPrompt: (count) => `Generate ${count} unique ranking questions for couples. Each question should have 4-6 items to be ranked in order. Return ONLY a JSON array in this exact format: [{"question": "Rank these relationship priorities:", "items": ["item 1", "item 2", "item 3", "item 4"]}, ...]. No other text, just the JSON array.`,
+    validationRequired: true
+  },
+
   SHORT_FORM: {
     id: 'short_form',
     name: 'Short-Form Question',
@@ -96,6 +107,12 @@ export const validateQuestion = (question) => {
   // Type-specific validation
   if (questionType.id === 'multiple_choice') {
     if (!question.options || !Array.isArray(question.options) || question.options.length < 2) {
+      return false;
+    }
+  }
+
+  if (questionType.id === 'ranking') {
+    if (!question.items || !Array.isArray(question.items) || question.items.length < 3) {
       return false;
     }
   }
