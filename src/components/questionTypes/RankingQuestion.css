@@ -39,9 +39,8 @@
   cursor: grabbing;
 }
 
-.ranking-item:hover {
+.ranking-item:hover:not(.dragging) {
   border-color: var(--text-primary);
-  transform: translateX(4px);
 }
 
 .ranking-item.dragging {
@@ -68,7 +67,7 @@
   line-height: 1;
 }
 
-.ranking-item:hover .ranking-drag-hint {
+.ranking-item:hover:not(.dragging) .ranking-drag-hint {
   opacity: 1;
   color: var(--color-aim-purple);
 }
@@ -140,7 +139,6 @@
 
   .ranking-item:active {
     cursor: grabbing;
-    transform: scale(1.02);
   }
 
   .ranking-number {

@@ -4,7 +4,7 @@ import QuestionRenderer from './QuestionRenderer';
 import './Questions.css';
 
 function Questions() {
-  const { getCurrentQuestion, answerQuestion, skipQuestion, questionsLoading } = useApp();
+  const { getCurrentQuestion, answerQuestion, skipQuestion, questionsLoading, questionsPool } = useApp();
 
   const currentQuestion = getCurrentQuestion();
 
@@ -66,7 +66,9 @@ function Questions() {
     );
   }
 
-  if (!currentQuestion) {
+  // Only show "no more questions" if we've loaded questions and truly have none
+  // This prevents flashing between states on initial load
+  if (!currentQuestion && !questionsLoading && questionsPool.length === 0) {
     return (
       <div className="questions-page">
         <div className="questions-container">
@@ -83,6 +85,31 @@ function Questions() {
             </pre>
             <p className="question-empty-message">
               you've gone through all available questions for now
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If no current question but questions are still loading or pool exists,
+  // show loading state to prevent flash
+  if (!currentQuestion) {
+    return (
+      <div className="questions-page">
+        <div className="questions-container">
+          <div className="question-card">
+            <pre className="question-empty-art">
+{`┌──────────────────────────────┐
+│                              │
+│  generating more questions   │
+│                              │
+│      powered by groq llm     │
+│                              │
+└──────────────────────────────┘`}
+            </pre>
+            <p className="question-empty-message">
+              creating more unique questions for you
             </p>
           </div>
         </div>

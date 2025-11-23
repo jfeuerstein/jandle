@@ -31,7 +31,7 @@ function SortableItem({ id, index, item }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    pointerEvents: isDragging ? 'none' : 'auto',
   };
 
   return (
