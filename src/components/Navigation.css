@@ -4,6 +4,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  /* Safe area support for iPhone notch/dynamic island */
+  padding-top: var(--safe-area-inset-top);
 }
 
 .nav-container {
@@ -75,19 +77,38 @@
 
 @media (max-width: 768px) {
   .nav-container {
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-sm) var(--space-sm);
+    /* Add horizontal safe area padding */
+    padding-left: calc(var(--space-sm) + var(--safe-area-inset-left));
+    padding-right: calc(var(--space-sm) + var(--safe-area-inset-right));
+  }
+
+  .nav-header {
+    margin-bottom: var(--space-xs);
   }
 
   .nav-buttons {
     gap: var(--space-xs);
+    justify-content: stretch;
   }
 
   .nav-btn {
-    font-size: var(--text-xs);
-    padding: var(--space-xs);
+    font-size: var(--text-sm);
+    padding: var(--space-sm) var(--space-xs);
+    flex: 1;
+    min-width: 0;
+    /* Better touch target */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .nav-logo {
-    font-size: var(--text-base);
+    font-size: var(--text-lg);
+  }
+
+  .nav-user-indicator {
+    font-size: var(--text-xs);
   }
 }

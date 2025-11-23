@@ -1,6 +1,10 @@
 .answers-page {
   min-height: calc(100vh - 100px);
   padding: var(--space-xl);
+  /* Safe area padding */
+  padding-left: calc(var(--space-xl) + var(--safe-area-inset-left));
+  padding-right: calc(var(--space-xl) + var(--safe-area-inset-right));
+  padding-bottom: calc(var(--space-xl) + var(--safe-area-inset-bottom));
   animation: fadeIn 0.3s ease;
 }
 
@@ -184,6 +188,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat-message {
@@ -320,18 +326,85 @@
 @media (max-width: 768px) {
   .answers-page {
     padding: var(--space-md);
+    padding-left: calc(var(--space-md) + var(--safe-area-inset-left));
+    padding-right: calc(var(--space-md) + var(--safe-area-inset-right));
+    padding-bottom: calc(var(--space-md) + var(--safe-area-inset-bottom));
+  }
+
+  .answers-header {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+  }
+
+  .answers-title {
+    font-size: var(--text-xl);
+  }
+
+  .answer-item {
+    padding: var(--space-md);
+    /* Better touch target */
+    min-height: 80px;
+  }
+
+  .answer-item:active {
+    transform: translateX(2px);
+  }
+
+  .answer-item-question {
+    font-size: var(--text-base);
+  }
+
+  .answers-chat-container {
+    border-width: 1px;
+  }
+
+  .answers-chat-question {
+    padding: var(--space-sm);
+  }
+
+  .answers-chat-question p {
+    font-size: var(--text-base);
   }
 
   .answers-chat-messages {
-    max-height: 400px;
+    max-height: calc(60vh - 200px);
+    min-height: 300px;
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  .chat-message {
+    padding: var(--space-sm);
   }
 
   .answers-chat-input {
     flex-direction: column;
     align-items: stretch;
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+    /* Add safe area padding for iPhone home indicator */
+    padding-bottom: calc(var(--space-sm) + var(--safe-area-inset-bottom));
+  }
+
+  .chat-textarea {
+    font-size: 16px;
+    min-height: 60px;
+    max-height: 120px;
+    padding: var(--space-sm);
   }
 
   .chat-send-btn {
     width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+  }
+
+  .answers-back-btn {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .answers-empty-art {
+    font-size: 0.65rem;
   }
 }

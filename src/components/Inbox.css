@@ -1,6 +1,10 @@
 .inbox-page {
   min-height: calc(100vh - 100px);
   padding: var(--space-xl);
+  /* Safe area padding */
+  padding-left: calc(var(--space-xl) + var(--safe-area-inset-left));
+  padding-right: calc(var(--space-xl) + var(--safe-area-inset-right));
+  padding-bottom: calc(var(--space-xl) + var(--safe-area-inset-bottom));
   animation: fadeIn 0.3s ease;
 }
 
@@ -232,17 +236,62 @@
 @media (max-width: 768px) {
   .inbox-page {
     padding: var(--space-md);
+    padding-left: calc(var(--space-md) + var(--safe-area-inset-left));
+    padding-right: calc(var(--space-md) + var(--safe-area-inset-right));
+    padding-bottom: calc(var(--space-md) + var(--safe-area-inset-bottom));
+  }
+
+  .inbox-header {
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+  }
+
+  .inbox-title {
+    font-size: var(--text-xl);
+  }
+
+  .inbox-item {
+    padding: var(--space-md);
+    /* Better touch target */
+    min-height: 80px;
+  }
+
+  .inbox-item:active {
+    transform: translateX(2px);
+  }
+
+  .inbox-item-question {
+    font-size: var(--text-base);
   }
 
   .inbox-answer-card {
     padding: var(--space-md);
+    border-width: 1px;
   }
 
   .inbox-answer-actions {
     flex-direction: column;
+    gap: var(--space-sm);
   }
 
   .inbox-btn {
     width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+  }
+
+  .inbox-back-btn {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .inbox-textarea {
+    min-height: 120px;
+    font-size: 16px;
+    padding: var(--space-md);
+  }
+
+  .inbox-empty-art {
+    font-size: 0.65rem;
   }
 }

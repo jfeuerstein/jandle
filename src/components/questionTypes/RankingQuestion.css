@@ -114,3 +114,52 @@
   border-color: var(--color-aim-yellow);
   color: var(--color-aim-yellow);
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .ranking-question {
+    gap: var(--space-md);
+  }
+
+  .ranking-instructions {
+    font-size: var(--text-xs);
+  }
+
+  .ranking-items {
+    gap: var(--space-sm);
+  }
+
+  .ranking-item {
+    padding: var(--space-md);
+    font-size: var(--text-base);
+    /* Better touch target for dragging */
+    min-height: 60px;
+    /* Improve touch dragging */
+    touch-action: none;
+  }
+
+  .ranking-item:active {
+    cursor: grabbing;
+    transform: scale(1.02);
+  }
+
+  .ranking-number {
+    font-size: var(--text-base);
+  }
+
+  .ranking-drag-hint {
+    font-size: 20px;
+  }
+
+  .ranking-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .ranking-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+}

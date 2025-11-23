@@ -102,3 +102,37 @@
   border-color: var(--color-aim-yellow);
   color: var(--color-aim-yellow);
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .long-form-question {
+    gap: var(--space-md);
+  }
+
+  .question-scenario {
+    padding: var(--space-sm);
+    margin-top: var(--space-xs);
+  }
+
+  .scenario-text {
+    font-size: var(--text-sm);
+  }
+
+  .long-form-textarea {
+    font-size: 16px;
+    padding: var(--space-md);
+    min-height: 120px;
+  }
+
+  .long-form-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .long-form-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+}

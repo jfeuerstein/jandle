@@ -97,3 +97,41 @@
   border-color: var(--color-aim-yellow);
   color: var(--color-aim-yellow);
 }
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .multiple-choice-question {
+    gap: var(--space-md);
+  }
+
+  .multiple-choice-options {
+    gap: var(--space-sm);
+  }
+
+  .multiple-choice-option {
+    padding: var(--space-md);
+    font-size: var(--text-base);
+    /* Better touch target */
+    min-height: 60px;
+  }
+
+  .multiple-choice-option:active {
+    transform: translateX(2px);
+  }
+
+  .option-letter {
+    font-size: var(--text-base);
+  }
+
+  .multiple-choice-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .multiple-choice-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+}
