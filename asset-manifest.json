@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/jandle/static/css/main.ef8155a1.css",
+    "main.css": "/jandle/static/css/main.f24bde08.css",
     "main.js": "/jandle/static/js/main.3a0b536f.js",
     "static/js/453.968497fd.chunk.js": "/jandle/static/js/453.968497fd.chunk.js",
     "index.html": "/jandle/index.html",
-    "main.ef8155a1.css.map": "/jandle/static/css/main.ef8155a1.css.map",
+    "main.f24bde08.css.map": "/jandle/static/css/main.f24bde08.css.map",
     "main.3a0b536f.js.map": "/jandle/static/js/main.3a0b536f.js.map",
     "453.968497fd.chunk.js.map": "/jandle/static/js/453.968497fd.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ef8155a1.css",
+    "static/css/main.f24bde08.css",
     "static/js/main.3a0b536f.js"
   ]
 }
