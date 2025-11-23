@@ -19,7 +19,7 @@ const groqApiKey = defineSecret("GROQ_API_KEY");
  */
 const RATE_LIMIT_COLLECTION = "system";
 const RATE_LIMIT_DOC = "groqRateLimit";
-const RATE_LIMIT_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const RATE_LIMIT_DURATION_MS = 30 * 1000; // 30 sec
 
 /**
  * Check if we're currently in a rate limit cooldown period
