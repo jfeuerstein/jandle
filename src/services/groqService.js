@@ -3,7 +3,7 @@
  * Now uses Firebase Cloud Functions to protect API keys
  */
 
-import { QUESTION_TYPES, getRandomQuestionType } from '../config/questionTypes';
+import { getRandomQuestionType } from '../config/questionTypes';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '../firebase';
 
@@ -71,21 +71,31 @@ export const generateQuestions = async (count = 10) => {
 
     console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${rankingCount} ranking, ${shortFormCount} short-form, ${longFormCount} long-form questions`);
 
-    // Generate questions for each type in parallel
-    const [yesNoQuestions, multipleChoiceQuestions, rankingQuestions, shortFormQuestions, longFormQuestions] = await Promise.all([
-      generateByType(QUESTION_TYPES.YES_NO, yesNoCount),
-      generateByType(QUESTION_TYPES.MULTIPLE_CHOICE, multipleChoiceCount),
-      generateByType(QUESTION_TYPES.RANKING, rankingCount),
-      generateByType(QUESTION_TYPES.SHORT_FORM, shortFormCount),
-      generateByType(QUESTION_TYPES.LONG_FORM, longFormCount)
-    ]);
+    // Use batch mode: generate all question types in a single API call
+    const generateQuestions = httpsCallable(functions, 'generateQuestions');
+    const result = await generateQuestions({
+      batch: true,
+      typeCounts: {
+        yes_no: yesNoCount,
+        multiple_choice: multipleChoiceCount,
+        ranking: rankingCount,
+        short_form: shortFormCount,
+        long_form: longFormCount
+      }
+    });
+
+    if (!result.data.success) {
+      throw new Error(result.data.error || 'Unknown error from Cloud Function');
+    }
+
+    const batchResults = result.data.questions;
 
     // Convert to app format
     let allQuestions = [];
     let idCounter = Date.now();
 
     // Yes/No questions
-    yesNoQuestions.forEach(text => {
+    (batchResults.yes_no || []).forEach(text => {
       allQuestions.push({
         id: idCounter++,
         type: 'yes_no',
@@ -94,7 +104,7 @@ export const generateQuestions = async (count = 10) => {
     });
 
     // Multiple choice questions
-    multipleChoiceQuestions.forEach(q => {
+    (batchResults.multiple_choice || []).forEach(q => {
       allQuestions.push({
         id: idCounter++,
         type: 'multiple_choice',
@@ -104,7 +114,7 @@ export const generateQuestions = async (count = 10) => {
     });
 
     // Ranking questions
-    rankingQuestions.forEach(q => {
+    (batchResults.ranking || []).forEach(q => {
       allQuestions.push({
         id: idCounter++,
         type: 'ranking',
@@ -114,7 +124,7 @@ export const generateQuestions = async (count = 10) => {
     });
 
     // Short-form questions
-    shortFormQuestions.forEach(q => {
+    (batchResults.short_form || []).forEach(q => {
       allQuestions.push({
         id: idCounter++,
         type: 'short_form',
@@ -123,7 +133,7 @@ export const generateQuestions = async (count = 10) => {
     });
 
     // Long-form questions
-    longFormQuestions.forEach(q => {
+    (batchResults.long_form || []).forEach(q => {
       allQuestions.push({
         id: idCounter++,
         type: 'long_form',
@@ -140,7 +150,21 @@ export const generateQuestions = async (count = 10) => {
 
   } catch (error) {
     console.error('Error generating questions with Groq:', error);
-    throw error;
+
+    // Provide more helpful error messages
+    if (error.code === 'functions/resource-exhausted') {
+      const details = error.details || {};
+      const remainingSeconds = details.remainingSeconds || 0;
+      throw new Error(`Rate limit reached. Please wait ${remainingSeconds} seconds before trying again.`);
+    } else if (error.code === 'functions/unauthenticated') {
+      throw new Error('Authentication required to generate questions');
+    } else if (error.code === 'functions/not-found') {
+      throw new Error('Question generation service not available. Please ensure Firebase Functions are deployed.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to generate questions. Please try again.');
+    }
   }
 };
 

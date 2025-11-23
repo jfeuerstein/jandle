@@ -134,7 +134,9 @@ const QUESTION_TYPES = {
 /**
  * Generate questions using Groq API
  * Callable function for Firebase
- * Data: { questionType: 'yes_no' | 'multiple_choice' | 'long_form', count: number }
+ * Data:
+ *   Single type: { questionType: 'yes_no' | 'multiple_choice' | 'long_form', count: number }
+ *   Batch mode: { batch: true, typeCounts: { yes_no: 2, multiple_choice: 2, ... } }
  */
 exports.generateQuestions = onCall(
     {
@@ -157,8 +159,105 @@ exports.generateQuestions = onCall(
           );
         }
 
-        const {questionType, count} = request.data;
+        const {questionType, count, batch, typeCounts} = request.data;
 
+        // Handle batch mode: generate multiple question types in one request
+        if (batch && typeCounts) {
+          logger.info("Batch mode: generating questions for multiple types");
+
+          // Build a combined prompt that generates all question types at once
+          const systemPrompt = `You are a relationship expert who creates deep, thought-provoking questions for couples.
+You will generate questions of different types as specified. Each type has specific formatting requirements.`;
+
+          const typeRequests = [];
+          Object.entries(typeCounts).forEach(([typeId, typeCount]) => {
+            if (typeCount > 0) {
+              const questionTypeKey = typeId.toUpperCase().replace(/-/g, "_");
+              const typeConfig = QUESTION_TYPES[questionTypeKey];
+              if (typeConfig) {
+                typeRequests.push(`- ${typeCount} ${typeId} questions`);
+              }
+            }
+          });
+
+          const userPrompt = `Generate the following questions for couples:
+${typeRequests.join("\n")}
+
+Return ONLY a JSON object with this exact structure:
+{
+  "yes_no": ["question 1?", "question 2?", ...],
+  "multiple_choice": [{"question": "text?", "options": ["opt1", "opt2", "opt3"]}, ...],
+  "ranking": [{"question": "text", "items": ["item1", "item2", "item3", "item4"]}, ...],
+  "short_form": [{"question": "text?"}, ...],
+  "long_form": [{"scenario": "scenario text...", "question": "question?"}, ...]
+}
+
+Include only the question types requested above. No other text, just the JSON object.`;
+
+          // Call Groq API once for all types
+          const groqResponse = await fetch(
+              "https://api.groq.com/openai/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${groqApiKey.value()}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "llama-3.1-8b-instant",
+                  messages: [
+                    {role: "system", content: systemPrompt},
+                    {role: "user", content: userPrompt},
+                  ],
+                  temperature: 0.9,
+                  max_tokens: 3000,
+                }),
+              },
+          );
+
+          if (!groqResponse.ok) {
+            const errorText = await groqResponse.text();
+            logger.error("Groq API error:", groqResponse.status, errorText);
+
+            if (groqResponse.status === 429) {
+              const cooldownEnds = await setRateLimit();
+              throw new HttpsError(
+                  "resource-exhausted",
+                  "Rate limit exceeded. Question generation paused for 10 minutes.",
+                  {
+                    cooldownEnds,
+                    remainingSeconds: Math.ceil(RATE_LIMIT_DURATION_MS / 1000),
+                  },
+              );
+            }
+
+            throw new HttpsError(
+                "internal",
+                `Groq API error: ${groqResponse.status}`,
+            );
+          }
+
+          const data = await groqResponse.json();
+          const content = data.choices[0]?.message?.content;
+
+          if (!content) {
+            logger.error("No content in Groq API response");
+            throw new HttpsError(
+                "internal",
+                "No content in Groq API response",
+            );
+          }
+
+          const parsedContent = JSON.parse(content.trim());
+
+          return {
+            success: true,
+            batch: true,
+            questions: parsedContent,
+          };
+        }
+
+        // Original single-type mode
         // Validate input
         if (!questionType || !count) {
           throw new HttpsError(
@@ -173,7 +272,7 @@ exports.generateQuestions = onCall(
         if (!QUESTION_TYPES[questionTypeKey]) {
           throw new HttpsError(
               "invalid-argument",
-              `Invalid question type: ${questionType}. 
+              `Invalid question type: ${questionType}.
               Valid types: ${Object.keys(QUESTION_TYPES).map((k) => k.toLowerCase()).join(", ")}`,
           );
         }
