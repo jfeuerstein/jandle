@@ -326,6 +326,22 @@ export const AppProvider = ({ children }) => {
 
       await set(ref(database, 'answers/josh'), updatedJoshAnswers);
       await set(ref(database, 'answers/nini'), updatedNiniAnswers);
+
+      // Mark as viewed for the sender so they don't see their own message as "new"
+      const answer = (currentUser === 'josh' ? updatedJoshAnswers : updatedNiniAnswers)
+        .find(a => a.questionId === questionId);
+
+      if (answer) {
+        const messageCount = answer.messages?.length || 0;
+        const updatedViewedStatus = {
+          ...(viewedStatus[currentUser] || {}),
+          [questionId]: {
+            lastViewed: Date.now(),
+            lastMessageCount: messageCount
+          }
+        };
+        await set(ref(database, `viewedStatus/${currentUser}`), updatedViewedStatus);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     }

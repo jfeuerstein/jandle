@@ -6,29 +6,56 @@ import Navigation from './components/Navigation';
 import Questions from './components/Questions';
 import Inbox from './components/Inbox';
 import Answers from './components/Answers';
+import ThemeParticles from './components/ThemeParticles';
+import { getCurrentTheme } from './utils/themeUtils';
+import { useButtonParticles } from './hooks/useButtonParticles';
 import './App.css';
 
 function AppContent() {
   const { currentUser, currentPage } = useApp();
+  const [currentTheme, setCurrentTheme] = React.useState(getCurrentTheme());
+
+  // Enable button particle effects
+  useButtonParticles();
+
+  // Apply theme class to body
+  React.useEffect(() => {
+    const theme = getCurrentTheme();
+    setCurrentTheme(theme);
+    document.body.className = `theme-${theme}`;
+  }, []);
 
   if (!currentUser) {
-    return <UserSelect />;
+    return (
+      <>
+        <ThemeParticles theme={currentTheme} />
+        <UserSelect />
+      </>
+    );
   }
 
   // Show landing page before entering the main app
   if (currentPage === 'landing') {
-    return <Landing />;
+    return (
+      <>
+        <ThemeParticles theme={currentTheme} />
+        <Landing />
+      </>
+    );
   }
 
   return (
-    <div className="app-main">
-      <Navigation />
-      <div className="app-content">
-        {currentPage === 'questions' && <Questions />}
-        {currentPage === 'inbox' && <Inbox />}
-        {currentPage === 'answers' && <Answers />}
+    <>
+      <ThemeParticles theme={currentTheme} />
+      <div className="app-main">
+        <Navigation />
+        <div className="app-content">
+          {currentPage === 'questions' && <Questions />}
+          {currentPage === 'inbox' && <Inbox />}
+          {currentPage === 'answers' && <Answers />}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

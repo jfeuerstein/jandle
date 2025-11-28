@@ -181,22 +181,7 @@ function Answers() {
         </div>
 
         {/* Hide other questions - only show selected question in compact form */}
-        <div className="answers-list-compact">
-          <div className="answer-item answer-item-selected">
-            <div className="answer-item-question">
-              {selectedAnswer.questionText}
-            </div>
-            <div className="answer-item-footer">
-              <span className="answer-item-messages">
-                {(selectedAnswer.messages && selectedAnswer.messages.length > 0)
-                  ? `${selectedAnswer.messages.length} message${selectedAnswer.messages.length !== 1 ? 's' : ''}`
-                  : 'no messages yet'}
-              </span>
-              <span className="answer-item-status">[ currently viewing ]</span>
-            </div>
-          </div>
-        </div>
-
+        
         <div className="answers-chat-container">
           <div className="answers-chat-question">
             <span className="answers-chat-label">question:</span>

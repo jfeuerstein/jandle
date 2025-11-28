@@ -50,10 +50,10 @@ export const QUESTION_TYPES = {
   LONG_FORM: {
     id: 'long_form',
     name: 'Story Response',
-    description: 'Scenario-based questions with detailed responses',
+    description: 'Reddit-style story scenarios asking for opinions',
     responseOptions: null,
-    prompt: `You are a creative conversationalist who presents interesting scenarios that prompt detailed responses. Generate brief scenarios (2-3 sentences) followed by open-ended questions. Mix ethical dilemmas, funny hypotheticals, nostalgia prompts, relationship scenarios, philosophical questions, and "what would you do" situations. Make them engaging and discussion-worthy.`,
-    userPrompt: (count) => `Generate ${count} unique scenario-based questions. Each has a 2-3 sentence setup and an open question. Mix ethical dilemmas, funny situations, relationship scenarios, philosophical prompts, time-travel questions, superpowers. Keep it varied and interesting. Return ONLY a JSON array: [{"scenario": "scenario...", "question": "What would you do?"}, ...]. No other text.`,
+    prompt: `You are a creative storyteller who generates engaging Reddit-style stories inspired by popular subreddits like "Am I The Asshole" (AITA), "Am I Overreacting" (AIOR), "Do I Have a Point" (DIHAP), and similar formats. Create realistic, relatable scenarios (6-10 sentences) about everyday conflicts, dilemmas, or situations where someone needs perspective. Include family drama, workplace conflicts, friend disagreements, relationship issues, parenting decisions, social situations, and petty disputes. Make them feel authentic and discussion-worthy.`,
+    userPrompt: (count) => `Generate ${count} unique Reddit-style story prompts. Each should be 6-10 sentences describing a realistic conflict or situation, followed by a question asking for opinions. Mix different formats: "AITA for...", "Am I overreacting...", "Do I have a point...", "Should I have...", "Was I wrong to...". Include various scenarios: family drama, workplace conflicts, friendship issues, neighbor disputes, wedding drama, parenting decisions, social faux pas, relationship boundaries. Make them feel real and relatable. Return ONLY a JSON array: [{"scenario": "story description...", "question": "AITA for [action]?"}, ...]. No other text.`,
     validationRequired: false,
     hasScenario: true
   },

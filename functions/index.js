@@ -124,15 +124,20 @@ const QUESTION_TYPES = {
   },
   LONG_FORM: {
     id: "long_form",
-    prompt: `You are a creative conversationalist who presents interesting scenarios that prompt
-    detailed responses. Generate brief scenarios (2-3 sentences) followed by open-ended questions.
-    Mix ethical dilemmas, funny hypotheticals, nostalgia prompts, relationship scenarios,
-    philosophical questions, and "what would you do" situations. Make them engaging and discussion-worthy.`,
+    prompt: `You are a creative storyteller who generates engaging Reddit-style stories inspired by
+    popular subreddits like "Am I The Asshole" (AITA), "Am I Overreacting" (AIOR), "Do I Have a
+    Point" (DIHAP), and similar formats. Create realistic, relatable scenarios (6-10 sentences)
+    about everyday conflicts, dilemmas, or situations where someone needs perspective. Include
+    family drama, workplace conflicts, friend disagreements, relationship issues, parenting decisions,
+    social situations, and petty disputes. Make them feel authentic and discussion-worthy.`,
     userPrompt: (count) =>
-      `Generate ${count} unique scenario-based questions. Each has a 2-3 sentence setup and an
-    open question. Mix ethical dilemmas, funny situations, relationship scenarios, philosophical
-    prompts, time-travel questions, superpowers. Keep it varied and interesting. Return ONLY a
-    JSON array: [{"scenario": "scenario...", "question": "What would you do?"}, ...]. No other text.`,
+      `Generate ${count} unique Reddit-style story prompts. Each should be 6-10 sentences describing
+    a realistic conflict or situation, followed by a question asking for opinions. Mix different
+    formats: "AITA for...", "Am I overreacting...", "Do I have a point...", "Should I have...",
+    "Was I wrong to...". Include various scenarios: family drama, workplace conflicts, friendship
+    issues, neighbor disputes, wedding drama, parenting decisions, social faux pas, relationship
+    boundaries. Make them feel real and relatable. Return ONLY a JSON array:
+    [{"scenario": "story description...", "question": "AITA for [action]?"}, ...]. No other text.`,
   },
   WOULD_YOU_RATHER: {
     id: "would_you_rather",
@@ -197,6 +202,7 @@ const QUESTION_TYPES = {
  * Data:
  *   Single type: { questionType: 'yes_no' | 'multiple_choice' | 'long_form', count: number }
  *   Batch mode: { batch: true, typeCounts: { yes_no: 2, multiple_choice: 2, ... } }
+ *   Note: Batch mode makes separate API calls for each type using full prompts for better quality
  */
 exports.generateQuestions = onCall(
     {
@@ -221,104 +227,94 @@ exports.generateQuestions = onCall(
 
         const {questionType, count, batch, typeCounts} = request.data;
 
-        // Handle batch mode: generate multiple question types in one request
+        // Handle batch mode: generate multiple question types using individual prompts
         if (batch && typeCounts) {
-          logger.info("Batch mode: generating questions for multiple types");
+          logger.info("Batch mode: generating questions for multiple types with full prompts");
 
-          // Build a combined prompt that generates all question types at once
-          const systemPrompt = `You are a creative conversationalist who creates thought-provoking
-questions that reveal personality and spark great conversations. You will generate questions of
-different types as specified. Each type has specific formatting requirements.`;
+          const allResults = {};
 
-          const typeRequests = [];
-          Object.entries(typeCounts).forEach(([typeId, typeCount]) => {
+          // Generate each question type separately with its full detailed prompt
+          for (const [typeId, typeCount] of Object.entries(typeCounts)) {
             if (typeCount > 0) {
               const questionTypeKey = typeId.toUpperCase().replace(/-/g, "_");
               const typeConfig = QUESTION_TYPES[questionTypeKey];
-              if (typeConfig) {
-                typeRequests.push(`- ${typeCount} ${typeId} questions`);
+
+              if (!typeConfig) {
+                logger.warn(`Unknown question type: ${typeId}`);
+                continue;
               }
-            }
-          });
 
-          const userPrompt = `Generate the following questions:
-${typeRequests.join("\n")}
+              logger.info(`Generating ${typeCount} ${typeId} questions with full prompt`);
 
-Return ONLY a JSON object with this exact structure:
-{
-  "yes_no": ["question 1?", "question 2?", ...],
-  "multiple_choice": [{"question": "text?", "options": ["opt1", "opt2", "opt3"]}, ...],
-  "ranking": [{"question": "text", "items": ["item1", "item2", "item3", "item4"]}, ...],
-  "short_form": [{"question": "text?"}, ...],
-  "long_form": [{"scenario": "scenario text...", "question": "question?"}, ...],
-  "would_you_rather": [{"question": "Would you rather...", "option1": "choice 1", "option2": "choice 2"}, ...],
-  "hot_take": [{"question": "What's your hot take on..."}, ...],
-  "this_or_that": [{"question": "This or that:", "option1": "option A", "option2": "option B"}, ...],
-  "hypothetical": [{"question": "If you could..."}, ...]
-}
-
-Include only the question types requested above. No other text, just the JSON object.`;
-
-          // Call Groq API once for all types
-          const groqResponse = await fetch(
-              "https://api.groq.com/openai/v1/chat/completions",
-              {
-                method: "POST",
-                headers: {
-                  "Authorization": `Bearer ${groqApiKey.value()}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  model: "llama-3.1-8b-instant",
-                  messages: [
-                    {role: "system", content: systemPrompt},
-                    {role: "user", content: userPrompt},
-                  ],
-                  temperature: 0.9,
-                  max_tokens: 3000,
-                }),
-              },
-          );
-
-          if (!groqResponse.ok) {
-            const errorText = await groqResponse.text();
-            logger.error("Groq API error:", groqResponse.status, errorText);
-
-            if (groqResponse.status === 429) {
-              const cooldownEnds = await setRateLimit();
-              throw new HttpsError(
-                  "resource-exhausted",
-                  "Rate limit exceeded. Question generation paused for 10 minutes.",
+              // Call Groq API with the specific type's full prompt
+              const groqResponse = await fetch(
+                  "https://api.groq.com/openai/v1/chat/completions",
                   {
-                    cooldownEnds,
-                    remainingSeconds: Math.ceil(RATE_LIMIT_DURATION_MS / 1000),
+                    method: "POST",
+                    headers: {
+                      "Authorization": `Bearer ${groqApiKey.value()}`,
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      model: "llama-3.1-8b-instant",
+                      messages: [
+                        {
+                          role: "system",
+                          content: typeConfig.prompt,
+                        },
+                        {
+                          role: "user",
+                          content: typeConfig.userPrompt(typeCount),
+                        },
+                      ],
+                      temperature: 0.9,
+                      max_tokens: 2000,
+                    }),
                   },
               );
+
+              if (!groqResponse.ok) {
+                const errorText = await groqResponse.text();
+                logger.error(`Groq API error for ${typeId}:`, groqResponse.status, errorText);
+
+                if (groqResponse.status === 429) {
+                  const cooldownEnds = await setRateLimit();
+                  throw new HttpsError(
+                      "resource-exhausted",
+                      "Rate limit exceeded. Question generation paused for 30 seconds.",
+                      {
+                        cooldownEnds,
+                        remainingSeconds: Math.ceil(RATE_LIMIT_DURATION_MS / 1000),
+                      },
+                  );
+                }
+
+                throw new HttpsError(
+                    "internal",
+                    `Groq API error for ${typeId}: ${groqResponse.status}`,
+                );
+              }
+
+              const data = await groqResponse.json();
+              const content = data.choices[0]?.message?.content;
+
+              if (!content) {
+                logger.error(`No content in Groq API response for ${typeId}`);
+                throw new HttpsError(
+                    "internal",
+                    `No content in Groq API response for ${typeId}`,
+                );
+              }
+
+              const parsedContent = JSON.parse(content.trim());
+              allResults[typeId] = parsedContent;
             }
-
-            throw new HttpsError(
-                "internal",
-                `Groq API error: ${groqResponse.status}`,
-            );
           }
-
-          const data = await groqResponse.json();
-          const content = data.choices[0]?.message?.content;
-
-          if (!content) {
-            logger.error("No content in Groq API response");
-            throw new HttpsError(
-                "internal",
-                "No content in Groq API response",
-            );
-          }
-
-          const parsedContent = JSON.parse(content.trim());
 
           return {
             success: true,
             batch: true,
-            questions: parsedContent,
+            questions: allResults,
           };
         }
 

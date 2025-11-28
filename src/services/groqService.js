@@ -59,17 +59,21 @@ const generateByType = async (questionType, count) => {
  */
 export const generateQuestions = async (count = 10) => {
   try {
-    // Distribute questions across all 5 types
-    const questionsPerType = Math.floor(count / 5);
-    const remainder = count % 5;
+    // Distribute questions across all 9 types
+    const questionsPerType = Math.floor(count / 9);
+    const remainder = count % 9;
 
     const yesNoCount = questionsPerType + (remainder > 0 ? 1 : 0);
     const multipleChoiceCount = questionsPerType + (remainder > 1 ? 1 : 0);
     const rankingCount = questionsPerType + (remainder > 2 ? 1 : 0);
     const shortFormCount = questionsPerType + (remainder > 3 ? 1 : 0);
-    const longFormCount = questionsPerType;
+    const longFormCount = questionsPerType + (remainder > 4 ? 1 : 0);
+    const wouldYouRatherCount = questionsPerType + (remainder > 5 ? 1 : 0);
+    const hotTakeCount = questionsPerType + (remainder > 6 ? 1 : 0);
+    const thisOrThatCount = 0;
+    const hypotheticalCount = questionsPerType;
 
-    console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${rankingCount} ranking, ${shortFormCount} short-form, ${longFormCount} long-form questions`);
+    console.log(`Generating ${yesNoCount} yes/no, ${multipleChoiceCount} multiple choice, ${rankingCount} ranking, ${shortFormCount} short-form, ${longFormCount} long-form, ${wouldYouRatherCount} would-you-rather, ${hotTakeCount} hot-take, ${thisOrThatCount} this-or-that, ${hypotheticalCount} hypothetical questions`);
 
     // Use batch mode: generate all question types in a single API call
     const generateQuestions = httpsCallable(functions, 'generateQuestions');
@@ -80,7 +84,11 @@ export const generateQuestions = async (count = 10) => {
         multiple_choice: multipleChoiceCount,
         ranking: rankingCount,
         short_form: shortFormCount,
-        long_form: longFormCount
+        long_form: longFormCount,
+        would_you_rather: wouldYouRatherCount,
+        hot_take: hotTakeCount,
+        this_or_that: thisOrThatCount,
+        hypothetical: hypotheticalCount
       }
     });
 
@@ -139,6 +147,46 @@ export const generateQuestions = async (count = 10) => {
         type: 'long_form',
         text: q.question.toLowerCase().trim(),
         scenario: q.scenario
+      });
+    });
+
+    // Would You Rather questions
+    (batchResults.would_you_rather || []).forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'would_you_rather',
+        text: q.question.toLowerCase().trim(),
+        option1: q.option1,
+        option2: q.option2
+      });
+    });
+
+    // Hot Take questions
+    (batchResults.hot_take || []).forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'hot_take',
+        text: q.question.toLowerCase().trim()
+      });
+    });
+
+    // This or That questions
+    (batchResults.this_or_that || []).forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'this_or_that',
+        text: q.question.toLowerCase().trim(),
+        option1: q.option1,
+        option2: q.option2
+      });
+    });
+
+    // Hypothetical questions
+    (batchResults.hypothetical || []).forEach(q => {
+      allQuestions.push({
+        id: idCounter++,
+        type: 'hypothetical',
+        text: q.question.toLowerCase().trim()
       });
     });
 
@@ -211,6 +259,34 @@ export const generateSingleQuestion = async () => {
       type: 'long_form',
       text: question.question.toLowerCase().trim(),
       scenario: question.scenario
+    };
+  } else if (questionType.id === 'would_you_rather') {
+    return {
+      id: Date.now(),
+      type: 'would_you_rather',
+      text: question.question.toLowerCase().trim(),
+      option1: question.option1,
+      option2: question.option2
+    };
+  } else if (questionType.id === 'hot_take') {
+    return {
+      id: Date.now(),
+      type: 'hot_take',
+      text: question.question.toLowerCase().trim()
+    };
+  } else if (questionType.id === 'this_or_that') {
+    return {
+      id: Date.now(),
+      type: 'this_or_that',
+      text: question.question.toLowerCase().trim(),
+      option1: question.option1,
+      option2: question.option2
+    };
+  } else if (questionType.id === 'hypothetical') {
+    return {
+      id: Date.now(),
+      type: 'hypothetical',
+      text: question.question.toLowerCase().trim()
     };
   }
 };

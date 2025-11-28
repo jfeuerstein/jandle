@@ -90,8 +90,8 @@ function LongFormQuestion({ question, onAnswer, onSkip, disabled }) {
       <div className="question-footer">
         <span className="question-hint">
           {showInput
-            ? 'write a thoughtful response to the scenario'
-            : 'read the scenario and share your perspective'}
+            ? 'share your honest opinion on this situation'
+            : 'read the story and weigh in with your take'}
         </span>
       </div>
     </div>

@@ -43,14 +43,16 @@ function Navigation() {
             className={`nav-btn ${currentPage === 'inbox' ? 'active' : ''}`}
             onClick={() => switchPage('inbox')}
           >
-            [ inbox {inboxCount > 0 && `(${inboxCount})`} ]
+            [ inbox ]
+            {inboxCount > 0 && <span className="nav-badge">{inboxCount}</span>}
           </button>
 
           <button
             className={`nav-btn ${currentPage === 'answers' ? 'active' : ''}`}
             onClick={() => switchPage('answers')}
           >
-            [ answers {unviewedCount > 0 && `(${unviewedCount})`} ]
+            [ answers ]
+            {unviewedCount > 0 && <span className="nav-badge">{unviewedCount}</span>}
           </button>
         </div>
       </div>
