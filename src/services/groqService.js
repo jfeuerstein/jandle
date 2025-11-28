@@ -192,6 +192,7 @@ export const generateQuestions = async (count = 10) => {
 
     // Shuffle the questions for variety
     allQuestions = shuffleArray(allQuestions);
+    console.log(allQuestions);
 
     console.log(`Successfully generated ${allQuestions.length} questions of mixed types`);
     return allQuestions;

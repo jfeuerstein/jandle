@@ -15,58 +15,6 @@ admin.initializeApp();
 const groqApiKey = defineSecret("GROQ_API_KEY");
 
 /**
- * Rate limit configuration
- */
-const RATE_LIMIT_COLLECTION = "system";
-const RATE_LIMIT_DOC = "groqRateLimit";
-const RATE_LIMIT_DURATION_MS = 30 * 1000; // 30 sec
-
-/**
- * Check if we're currently in a rate limit cooldown period
- */
-async function checkRateLimit() {
-  const db = admin.firestore();
-  const rateLimitRef = db.collection(RATE_LIMIT_COLLECTION).doc(RATE_LIMIT_DOC);
-  const doc = await rateLimitRef.get();
-
-  if (!doc.exists) {
-    return {isLimited: false};
-  }
-
-  const data = doc.data();
-  const now = Date.now();
-  const cooldownEnds = data.cooldownEnds;
-
-  if (cooldownEnds && now < cooldownEnds) {
-    const remainingSeconds = Math.ceil((cooldownEnds - now) / 1000);
-    return {
-      isLimited: true,
-      remainingSeconds,
-      cooldownEnds,
-    };
-  }
-
-  return {isLimited: false};
-}
-
-/**
- * Set a rate limit cooldown period
- */
-async function setRateLimit() {
-  const db = admin.firestore();
-  const rateLimitRef = db.collection(RATE_LIMIT_COLLECTION).doc(RATE_LIMIT_DOC);
-  const cooldownEnds = Date.now() + RATE_LIMIT_DURATION_MS;
-
-  await rateLimitRef.set({
-    cooldownEnds,
-    lastRateLimitHit: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  logger.warn(`Rate limit hit. Cooldown set until ${new Date(cooldownEnds).toISOString()}`);
-  return cooldownEnds;
-}
-
-/**
  * Question type configurations
  * These match the frontend QUESTION_TYPES config
  */
@@ -211,20 +159,6 @@ exports.generateQuestions = onCall(
     },
     async (request) => {
       try {
-        // Check if we're in a rate limit cooldown period
-        const rateLimitStatus = await checkRateLimit();
-        if (rateLimitStatus.isLimited) {
-          logger.warn(`Request blocked due to rate limit. ${rateLimitStatus.remainingSeconds}s remaining`);
-          throw new HttpsError(
-              "resource-exhausted",
-              `Rate limit active. Please try again in ${rateLimitStatus.remainingSeconds} seconds.`,
-              {
-                remainingSeconds: rateLimitStatus.remainingSeconds,
-                cooldownEnds: rateLimitStatus.cooldownEnds,
-              },
-          );
-        }
-
         const {questionType, count, batch, typeCounts} = request.data;
 
         // Handle batch mode: generate multiple question types using individual prompts
@@ -277,18 +211,6 @@ exports.generateQuestions = onCall(
                 const errorText = await groqResponse.text();
                 logger.error(`Groq API error for ${typeId}:`, groqResponse.status, errorText);
 
-                if (groqResponse.status === 429) {
-                  const cooldownEnds = await setRateLimit();
-                  throw new HttpsError(
-                      "resource-exhausted",
-                      "Rate limit exceeded. Question generation paused for 30 seconds.",
-                      {
-                        cooldownEnds,
-                        remainingSeconds: Math.ceil(RATE_LIMIT_DURATION_MS / 1000),
-                      },
-                  );
-                }
-
                 throw new HttpsError(
                     "internal",
                     `Groq API error for ${typeId}: ${groqResponse.status}`,
@@ -296,6 +218,8 @@ exports.generateQuestions = onCall(
               }
 
               const data = await groqResponse.json();
+              logger.info(`Groq API response for ${typeId}:`, JSON.stringify(data, null, 2));
+
               const content = data.choices[0]?.message?.content;
 
               if (!content) {
@@ -306,7 +230,10 @@ exports.generateQuestions = onCall(
                 );
               }
 
+              logger.info(`Content for ${typeId}:`, content);
+
               const parsedContent = JSON.parse(content.trim());
+              logger.info(`Parsed content for ${typeId}:`, JSON.stringify(parsedContent, null, 2));
               allResults[typeId] = parsedContent;
             }
           }
@@ -379,19 +306,6 @@ exports.generateQuestions = onCall(
           const errorText = await groqResponse.text();
           logger.error("Groq API error:", groqResponse.status, errorText);
 
-          // If we hit a 429 rate limit error, set a 10-minute cooldown
-          if (groqResponse.status === 429) {
-            const cooldownEnds = await setRateLimit();
-            throw new HttpsError(
-                "resource-exhausted",
-                "Rate limit exceeded. Question generation paused for 10 minutes.",
-                {
-                  cooldownEnds,
-                  remainingSeconds: Math.ceil(RATE_LIMIT_DURATION_MS / 1000),
-                },
-            );
-          }
-
           throw new HttpsError(
               "internal",
               `Groq API error: ${groqResponse.status}`,
@@ -399,6 +313,8 @@ exports.generateQuestions = onCall(
         }
 
         const data = await groqResponse.json();
+        logger.info("Groq API response:", JSON.stringify(data, null, 2));
+
         const content = data.choices[0]?.message?.content;
 
         if (!content) {
@@ -409,8 +325,11 @@ exports.generateQuestions = onCall(
           );
         }
 
+        logger.info("Content:", content);
+
         // Parse the JSON response
         const parsedContent = JSON.parse(content.trim());
+        logger.info("Parsed content:", JSON.stringify(parsedContent, null, 2));
 
         return {
           success: true,

@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../AppContext';
 import QuestionRenderer from './QuestionRenderer';
+import BirthdayPopup from './BirthdayPopup';
+import { getCurrentTheme, THEMES } from '../utils/themeUtils';
 import './Questions.css';
 
+const BIRTHDAY_CARD_VIEWED_KEY = 'jandle_birthday_card_viewed_2024';
+
 function Questions() {
-  const { getCurrentQuestion, answerQuestion, skipQuestion, questionsLoading, questionsPool } = useApp();
+  const { getCurrentQuestion, answerQuestion, skipQuestion, questionsLoading, questionsPool, switchPage, currentUser } = useApp();
+  const [showBirthdayPopup, setShowBirthdayPopup] = useState(false);
+
+  useEffect(() => {
+    // Only show popup for nini during birthday theme if not viewed
+    const theme = getCurrentTheme();
+    const hasViewed = localStorage.getItem(BIRTHDAY_CARD_VIEWED_KEY);
+
+    if (theme === THEMES.BIRTHDAY && !hasViewed) {
+      // Show popup after a short delay
+      const timer = setTimeout(() => {
+        setShowBirthdayPopup(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
+
+  const handleBirthdayAccept = () => {
+    setShowBirthdayPopup(false);
+    switchPage('birthday-puzzle');
+  };
+
+  const handleBirthdayClose = () => {
+    setShowBirthdayPopup(false);
+  };
 
   const currentQuestion = getCurrentQuestion();
 
@@ -118,18 +146,26 @@ function Questions() {
   }
 
   return (
-    <div className="questions-page">
-      <div className="questions-container">
-        <div className="question-card">
-          <QuestionRenderer
-            question={currentQuestion}
-            onAnswer={handleAnswer}
-            onSkip={handleSkip}
-            mode="questions"
-          />
+    <>
+      {showBirthdayPopup && (
+        <BirthdayPopup
+          onClose={handleBirthdayClose}
+          onAccept={handleBirthdayAccept}
+        />
+      )}
+      <div className="questions-page">
+        <div className="questions-container">
+          <div className="question-card">
+            <QuestionRenderer
+              question={currentQuestion}
+              onAnswer={handleAnswer}
+              onSkip={handleSkip}
+              mode="questions"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

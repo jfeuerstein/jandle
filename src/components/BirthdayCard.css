@@ -1,0 +1,115 @@
+.birthday-card {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  animation: fadeIn 0.5s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.birthday-card-container {
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.birthday-card-content {
+  border: 3px solid var(--color-aim-yellow);
+  padding: var(--space-xl);
+  background: var(--bg-primary);
+  position: relative;
+  animation: slideUp 0.5s ease;
+}
+
+.birthday-card-title {
+  font-size: var(--text-3xl);
+  color: var(--color-aim-yellow);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.birthday-card-message {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  margin-bottom: var(--space-xl);
+}
+
+.birthday-card-message p {
+  margin-bottom: var(--space-lg);
+}
+
+.birthday-card-signature {
+  margin-top: var(--space-xl);
+  text-align: right;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.birthday-card-close {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  background: transparent;
+  border: 2px solid var(--color-aim-purple);
+  color: var(--color-aim-purple);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.birthday-card-close:hover {
+  background: var(--color-aim-purple);
+  color: var(--bg-primary);
+}
+
+.birthday-card-confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.card-confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -20px;
+  animation: card-confetti-fall linear infinite;
+}
+
+@keyframes card-confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0.8;
+  }
+}
+
+@media (max-width: 768px) {
+  .birthday-card {
+    padding: var(--space-md);
+  }
+
+  .birthday-card-content {
+    padding: var(--space-lg);
+  }
+
+  .birthday-card-title {
+    font-size: var(--text-2xl);
+  }
+
+  .birthday-card-message {
+    font-size: var(--text-sm);
+  }
+}

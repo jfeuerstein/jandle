@@ -1,0 +1,95 @@
+.birthday-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.3s ease;
+}
+
+.birthday-popup {
+  background: var(--bg-primary);
+  border: 2px solid var(--color-aim-yellow);
+  padding: var(--space-xl);
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+.birthday-popup-content {
+  text-align: center;
+}
+
+.birthday-popup-title {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-md);
+  color: var(--color-aim-yellow);
+}
+
+.birthday-popup-message {
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.birthday-popup-submessage {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+}
+
+.birthday-popup-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.birthday-popup-btn {
+  padding: var(--space-md) var(--space-lg);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.birthday-popup-btn.primary {
+  border-color: var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+}
+
+.birthday-popup-btn.primary:hover {
+  background: var(--color-aim-yellow);
+  color: var(--bg-primary);
+}
+
+.birthday-popup-btn.secondary {
+  border-color: var(--border-primary);
+  color: var(--text-secondary);
+}
+
+.birthday-popup-btn.secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .birthday-popup {
+    padding: var(--space-lg);
+  }
+
+  .birthday-popup-title {
+    font-size: var(--text-2xl);
+  }
+
+  .birthday-popup-message {
+    font-size: var(--text-base);
+  }
+}

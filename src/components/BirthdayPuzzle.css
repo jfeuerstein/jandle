@@ -1,0 +1,134 @@
+.birthday-puzzle {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  animation: fadeIn 0.3s ease;
+}
+
+.birthday-puzzle-container {
+  max-width: 600px;
+  width: 100%;
+}
+
+.birthday-puzzle-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.birthday-puzzle-title {
+  font-size: var(--text-2xl);
+  color: var(--color-aim-yellow);
+  margin-bottom: var(--space-sm);
+}
+
+.birthday-puzzle-progress {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.birthday-puzzle-content {
+  border: 2px solid var(--border-primary);
+  padding: var(--space-xl);
+  background: var(--bg-hover);
+}
+
+.birthday-puzzle-question {
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+  white-space: pre-line;
+  line-height: 1.8;
+  font-style: italic;
+}
+
+.birthday-puzzle-input {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-primary);
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  transition: border-color 0.2s ease;
+}
+
+.birthday-puzzle-input:focus {
+  outline: none;
+  border-color: var(--color-aim-yellow);
+}
+
+.birthday-puzzle-error {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.birthday-puzzle-hint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-lg);
+  text-align: center;
+  font-style: italic;
+}
+
+.birthday-puzzle-submit {
+  width: 100%;
+  padding: var(--space-md);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  background: transparent;
+  border: 2px solid var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.birthday-puzzle-submit:hover {
+  background: var(--color-aim-yellow);
+  color: var(--bg-primary);
+}
+
+.birthday-puzzle-progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+}
+
+.puzzle-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border-primary);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.puzzle-dot.active {
+  border-color: var(--color-aim-yellow);
+  background: var(--color-aim-yellow);
+}
+
+.puzzle-dot.completed {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+@media (max-width: 768px) {
+  .birthday-puzzle {
+    padding: var(--space-md);
+  }
+
+  .birthday-puzzle-content {
+    padding: var(--space-lg);
+  }
+
+  .birthday-puzzle-question {
+    font-size: var(--text-lg);
+  }
+}

@@ -15,8 +15,8 @@ export const getCurrentTheme = () => {
   const month = now.getMonth() + 1; // getMonth() is 0-indexed
   const day = now.getDate();
 
-  // Birthday: 11/29 - 12/3 (inclusive)
-  if (month === 11 && day >= 29) {
+  // Birthday: 11/28 - 12/3 (inclusive)
+  if (month === 11 && day >= 28) {
     return THEMES.BIRTHDAY;
   }
   if (month === 12 && day <= 3) {
