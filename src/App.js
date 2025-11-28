@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppProvider, useApp } from './AppContext';
 import UserSelect from './components/UserSelect';
+import Landing from './components/Landing';
 import Navigation from './components/Navigation';
 import Questions from './components/Questions';
 import Inbox from './components/Inbox';
@@ -12,6 +13,11 @@ function AppContent() {
 
   if (!currentUser) {
     return <UserSelect />;
+  }
+
+  // Show landing page before entering the main app
+  if (currentPage === 'landing') {
+    return <Landing />;
   }
 
   return (

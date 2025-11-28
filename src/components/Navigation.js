@@ -5,11 +5,11 @@ import './Navigation.css';
 function Navigation() {
   const { currentUser, currentPage, switchPage, inbox, answers, viewedStatus } = useApp();
 
-  const inboxCount = inbox[currentUser]?.length || 0;
+  const inboxCount = (inbox && currentUser) ? (inbox[currentUser]?.length || 0) : 0;
 
   // Calculate unviewed answers count (new answers or answers with new messages)
-  const userAnswers = answers[currentUser] || [];
-  const userViewedStatus = viewedStatus[currentUser] || {};
+  const userAnswers = (answers && currentUser) ? (answers[currentUser] || []) : [];
+  const userViewedStatus = (viewedStatus && currentUser) ? (viewedStatus[currentUser] || {}) : {};
 
   const unviewedCount = userAnswers.filter(answer => {
     const viewed = userViewedStatus[answer.questionId];

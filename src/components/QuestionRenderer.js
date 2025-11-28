@@ -4,6 +4,10 @@ import MultipleChoiceQuestion from './questionTypes/MultipleChoiceQuestion';
 import RankingQuestion from './questionTypes/RankingQuestion';
 import ShortFormQuestion from './questionTypes/ShortFormQuestion';
 import LongFormQuestion from './questionTypes/LongFormQuestion';
+import WouldYouRatherQuestion from './questionTypes/WouldYouRatherQuestion';
+import HotTakeQuestion from './questionTypes/HotTakeQuestion';
+import ThisOrThatQuestion from './questionTypes/ThisOrThatQuestion';
+import HypotheticalQuestion from './questionTypes/HypotheticalQuestion';
 
 /**
  * QuestionRenderer - Renders the appropriate question component based on question type
@@ -70,6 +74,46 @@ function QuestionRenderer({ question, onAnswer, onSkip, disabled = false, mode =
     case 'long_form':
       return (
         <LongFormQuestion
+          question={question}
+          onAnswer={onAnswer}
+          onSkip={onSkip}
+          disabled={disabled}
+        />
+      );
+
+    case 'would_you_rather':
+      return (
+        <WouldYouRatherQuestion
+          question={question}
+          onAnswer={onAnswer}
+          onSkip={onSkip}
+          disabled={disabled}
+        />
+      );
+
+    case 'hot_take':
+      return (
+        <HotTakeQuestion
+          question={question}
+          onAnswer={onAnswer}
+          onSkip={onSkip}
+          disabled={disabled}
+        />
+      );
+
+    case 'this_or_that':
+      return (
+        <ThisOrThatQuestion
+          question={question}
+          onAnswer={onAnswer}
+          onSkip={onSkip}
+          disabled={disabled}
+        />
+      );
+
+    case 'hypothetical':
+      return (
+        <HypotheticalQuestion
           question={question}
           onAnswer={onAnswer}
           onSkip={onSkip}

@@ -8,12 +8,15 @@ function Inbox() {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
 
   // Filter out questions that have already been answered
-  const rawInbox = inbox[currentUser] || [];
-  const userAnswers = answers[currentUser] || [];
+  const rawInbox = (inbox && currentUser) ? (inbox[currentUser] || []) : [];
+  const userAnswers = (answers && currentUser) ? (answers[currentUser] || []) : [];
   const answeredQuestionIds = new Set(userAnswers.map(a => a.questionId));
   const userInbox = rawInbox.filter(item => !answeredQuestionIds.has(item.questionId));
 
   const handleSelectQuestion = (item) => {
+    console.log('Selected question:', item);
+    console.log('Question items:', item.questionItems);
+    console.log('Question options:', item.questionOptions);
     setSelectedQuestion(item);
   };
 
@@ -110,6 +113,7 @@ function Inbox() {
                     text: selectedQuestion.questionText,
                     type: selectedQuestion.questionType || 'long_form',
                     options: selectedQuestion.questionOptions,
+                    items: selectedQuestion.questionItems,
                     scenario: selectedQuestion.questionScenario
                   }}
                   onAnswer={handleSubmitAnswer}

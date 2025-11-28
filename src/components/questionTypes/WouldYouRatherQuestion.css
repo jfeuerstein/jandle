@@ -1,0 +1,145 @@
+.would-you-rather-question {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.would-you-rather-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.would-you-rather-option {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 20px;
+  background: transparent;
+  border: 2px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.would-you-rather-option:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.would-you-rather-option.selected {
+  border-color: var(--color-aim-purple);
+  background: rgba(51, 153, 255, 0.1);
+  color: var(--color-aim-purple);
+}
+
+.would-you-rather-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-label {
+  font-weight: bold;
+  color: var(--color-aim-yellow);
+  min-width: 20px;
+}
+
+.would-you-rather-option.selected .option-label {
+  color: var(--color-aim-purple);
+}
+
+.option-text {
+  flex: 1;
+}
+
+.or-divider {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+.would-you-rather-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.would-you-rather-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid var(--text-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.would-you-rather-btn:hover:not(:disabled) {
+  border-color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.would-you-rather-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.would-you-rather-btn-submit:hover:not(:disabled) {
+  border-color: var(--color-aim-purple);
+  color: var(--color-aim-purple);
+}
+
+.would-you-rather-btn-skip {
+  color: var(--text-secondary);
+}
+
+.would-you-rather-btn-skip:hover:not(:disabled) {
+  border-color: var(--color-aim-yellow);
+  color: var(--color-aim-yellow);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .would-you-rather-question {
+    gap: var(--space-md);
+  }
+
+  .would-you-rather-options {
+    gap: var(--space-sm);
+  }
+
+  .would-you-rather-option {
+    padding: var(--space-md);
+    font-size: var(--text-base);
+    min-height: 60px;
+  }
+
+  .would-you-rather-option:active {
+    transform: translateX(2px);
+  }
+
+  .option-label {
+    font-size: var(--text-base);
+  }
+
+  .would-you-rather-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .would-you-rather-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: var(--text-base);
+    padding: var(--space-sm) var(--space-md);
+  }
+}

@@ -7,18 +7,32 @@ function Answers() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [message, setMessage] = useState('');
 
-  const userAnswers = answers[currentUser] || [];
-  const userViewedStatus = viewedStatus[currentUser] || {};
+  const userAnswers = (answers && currentUser) ? (answers[currentUser] || []) : [];
+  const userViewedStatus = (viewedStatus && currentUser) ? (viewedStatus[currentUser] || {}) : {};
+
+  console.log('Answers component - userViewedStatus:', userViewedStatus);
+  console.log('Answers component - userAnswers count:', userAnswers.length);
 
   // Helper function to check if an answer is new or has new messages
   const isAnswerUnviewed = (answer) => {
     const viewed = userViewedStatus[answer.questionId];
-    if (!viewed) return true; // Never viewed
+    if (!viewed) {
+      console.log('Answer unviewed (never viewed):', answer.questionId);
+      return true; // Never viewed
+    }
 
     const currentMessageCount = answer.messages?.length || 0;
     const lastViewedMessageCount = viewed.lastMessageCount || 0;
+    const isUnviewed = currentMessageCount > lastViewedMessageCount;
 
-    return currentMessageCount > lastViewedMessageCount;
+    console.log('Answer viewed status:', answer.questionId, {
+      currentMessageCount,
+      lastViewedMessageCount,
+      isUnviewed,
+      viewedData: viewed
+    });
+
+    return isUnviewed;
   };
 
   // Sort answers: unviewed first, then by most recent message/creation
