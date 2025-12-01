@@ -6,13 +6,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 
 // Initialize Firebase in the service worker
 firebase.initializeApp({
-  apiKey: "AIzaSyDpxzGbqWxR3RV3KKjy0HJtLbx2e5dJ0ik",
+  apiKey: "AIzaSyC9f46Ldfje_R9f8FqZeP3eVToYJvyfKQU",
   authDomain: "jandle-app-33fa7.firebaseapp.com",
   projectId: "jandle-app-33fa7",
   storageBucket: "jandle-app-33fa7.firebasestorage.app",
-  messagingSenderId: "1016085959673",
-  appId: "1:1016085959673:web:d95b11d96cbfbea4e2e743",
-  measurementId: "G-QRZZ9LC5Y1"
+  messagingSenderId: "41384038632",
+  appId: "1:41384038632:web:3c57870e97f94fe4ad395d",
+  measurementId: "G-JVTSWD7ZYV"
 });
 
 const messaging = firebase.messaging();
