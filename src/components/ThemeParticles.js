@@ -40,7 +40,7 @@ const ThemeParticles = ({ theme }) => {
     return null;
   }
 
-  if (theme === THEMES.BIRTHDAY) {
+  if (theme === THEMES.BIRTHDAY || theme === THEMES.NEWYEARS) {
     const confettiPieces = isLandingPage ? confettiPiecesLarge : confettiPiecesSmall;
 
     return (

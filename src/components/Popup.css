@@ -1,4 +1,4 @@
-.birthday-card {
+.popup {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -6,50 +6,42 @@
   padding: var(--space-lg);
   animation: fadeIn 0.5s ease;
   position: relative;
-  overflow: hidden;
+  overflow-y:auto
 }
 
-.birthday-card-container {
+.popup-container {
   max-width: 700px;
   width: 100%;
   position: relative;
   z-index: 2;
+  overflow-y:auto
 }
 
-.birthday-card-content {
+.popup-content {
   border: 3px solid var(--color-aim-yellow);
   padding: var(--space-xl);
   background: var(--bg-primary);
   position: relative;
   animation: slideUp 0.5s ease;
+  overflow-y:auto
 }
 
-.birthday-card-title {
+.popup-title {
   font-size: var(--text-3xl);
   color: var(--color-aim-yellow);
   text-align: center;
   margin-bottom: var(--space-xl);
 }
 
-.birthday-card-message {
+.popup-message {
   color: var(--text-primary);
   font-size: var(--text-base);
   line-height: 1.8;
   margin-bottom: var(--space-xl);
+  white-space: pre-wrap;
 }
 
-.birthday-card-message p {
-  margin-bottom: var(--space-lg);
-}
-
-.birthday-card-signature {
-  margin-top: var(--space-xl);
-  text-align: right;
-  color: var(--text-secondary);
-  font-style: italic;
-}
-
-.birthday-card-close {
+.popup-close {
   width: 100%;
   padding: var(--space-md);
   font-size: var(--text-base);
@@ -61,12 +53,12 @@
   transition: all 0.2s ease;
 }
 
-.birthday-card-close:hover {
+.popup-close:hover {
   background: var(--color-aim-purple);
   color: var(--bg-primary);
 }
 
-.birthday-card-confetti {
+.popup-confetti {
   position: fixed;
   top: 0;
   left: 0;
@@ -77,15 +69,15 @@
   overflow: hidden;
 }
 
-.card-confetti-piece {
+.confetti-piece {
   position: absolute;
   width: 10px;
   height: 10px;
   top: -20px;
-  animation: card-confetti-fall linear infinite;
+  animation: confetti-fall linear infinite;
 }
 
-@keyframes card-confetti-fall {
+@keyframes confetti-fall {
   0% {
     transform: translateY(-20px) rotate(0deg);
     opacity: 1;
@@ -96,20 +88,40 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
-  .birthday-card {
+  .popup {
     padding: var(--space-md);
   }
 
-  .birthday-card-content {
+  .popup-content {
     padding: var(--space-lg);
   }
 
-  .birthday-card-title {
+  .popup-title {
     font-size: var(--text-2xl);
   }
 
-  .birthday-card-message {
+  .popup-message {
     font-size: var(--text-sm);
   }
 }

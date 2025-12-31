@@ -1,0 +1,178 @@
+.popup-flow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-lg);
+  animation: fadeIn 0.5s ease;
+  background: var(--bg-primary);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.popup-flow-container {
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  margin: auto 0;
+}
+
+.popup-flow-content {
+  border: 3px solid var(--color-aim-yellow);
+  padding: var(--space-xl);
+  background: var(--bg-primary);
+  position: relative;
+  animation: slideUp 0.5s ease;
+}
+
+.popup-flow-title {
+  font-size: var(--text-3xl);
+  color: var(--color-aim-yellow);
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.popup-flow-image {
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.popup-flow-image img {
+  max-width: 15vh;
+  height: auto;
+  border: 2px solid var(--color-aim-purple);
+  border-radius: 8px;
+}
+
+/* Define the animation sequence */
+@keyframes spin {
+  from {
+    transform: rotateY(0deg); /* Start at 0 degrees */
+  }
+  to {
+    transform: rotateY(360deg); /* End at 360 degrees, which is a full circle */
+  }
+}
+
+/* Apply the animation to your image or element */
+.spin-image {
+  animation-name: spin;
+  animation-duration: 4s; /* Duration of one full spin (adjust as needed) */
+  animation-iteration-count: infinite; /* Makes the animation repeat indefinitely */
+  animation-timing-function: linear; /* Ensures a constant, smooth speed */
+  /* Optional: Ensure the element is transformable if it's not a block-level element by default */
+}
+
+.popup-flow-message {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.8;
+  margin-bottom: var(--space-xl);
+  white-space: pre-wrap;
+}
+
+.popup-flow-navigation {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.popup-flow-button {
+  flex: 1;
+  padding: var(--space-md);
+  font-size: var(--text-base);
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+}
+
+.popup-flow-button-primary {
+  background: transparent;
+  border-color: var(--color-aim-purple);
+  color: var(--color-aim-purple);
+}
+
+.popup-flow-button-primary:hover {
+  background: var(--color-aim-purple);
+  color: var(--bg-primary);
+}
+
+.popup-flow-button-secondary {
+  background: transparent;
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.popup-flow-button-secondary:hover {
+  background: var(--text-secondary);
+  color: var(--bg-primary);
+}
+
+.popup-flow-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.popup-flow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.popup-flow-dot.active {
+  background: var(--color-aim-yellow);
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .popup-flow {
+    padding: var(--space-md);
+  }
+
+  .popup-flow-content {
+    padding: var(--space-lg);
+  }
+
+  .popup-flow-title {
+    font-size: var(--text-2xl);
+  }
+
+  .popup-flow-message {
+    font-size: var(--text-sm);
+  }
+
+  .popup-flow-navigation {
+    flex-direction: column;
+  }
+}

@@ -350,3 +350,486 @@ exports.generateQuestions = onCall(
       }
     },
 );
+
+/**
+ * Cloud Function to send push notifications when inbox items are added
+ * Triggers when a new question is answered and added to the other user's inbox
+ */
+exports.sendInboxNotification = require("firebase-functions/v2/database")
+    .onValueWritten("/inbox/{userId}", async (event) => {
+      const userId = event.params.userId;
+      const newData = event.data.after.val();
+      const oldData = event.data.before.val();
+
+      // Only send notification if new items were added
+      if (!newData || !Array.isArray(newData)) {
+        return null;
+      }
+
+      const newCount = newData.length;
+      const oldCount = oldData && Array.isArray(oldData) ? oldData.length : 0;
+
+      if (newCount <= oldCount) {
+        return null; // No new items
+      }
+
+      const newItems = newCount - oldCount;
+      logger.info(`New inbox items for ${userId}: ${newItems}`);
+
+      // Get user's device tokens
+      const tokensSnapshot = await admin.database()
+          .ref(`deviceTokens/${userId}`).once("value");
+      const tokens = tokensSnapshot.val();
+
+      if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
+        logger.info(`No device tokens found for ${userId}`);
+        return null;
+      }
+
+      // Create notification payload
+      const payload = {
+        notification: {
+          title: "New Question Waiting!",
+          body: newItems === 1 ?
+          "Your partner answered a question. Your turn!" :
+          `${newItems} new questions waiting for you!`,
+        },
+        data: {
+          type: "inbox",
+          url: "/inbox",
+          tag: "inbox-notification",
+        },
+      };
+
+      // Send to all tokens
+      try {
+        const response = await admin.messaging().sendEachForMulticast({
+          tokens: tokens,
+          notification: payload.notification,
+          data: payload.data,
+        });
+
+        logger.info(`Successfully sent ${response.successCount} notifications`);
+
+        // Clean up any invalid tokens
+        if (response.failureCount > 0) {
+          const validTokens = tokens.filter((token, index) => {
+            return response.responses[index].success;
+          });
+          await admin.database()
+              .ref(`deviceTokens/${userId}`).set(validTokens);
+        }
+
+        return response;
+      } catch (error) {
+        logger.error("Error sending notification:", error);
+        return null;
+      }
+    });
+
+/**
+ * Cloud Function to send push notifications when new messages are added
+ * Triggers when a message is added to an answer's messages array
+ */
+exports.sendMessageNotification = require("firebase-functions/v2/database")
+    .onValueWritten("/answers/{userId}/{answerId}/messages", async (event) => {
+      const userId = event.params.userId;
+      const newData = event.data.after.val();
+      const oldData = event.data.before.val();
+
+      // Only send notification if new messages were added
+      if (!newData || !Array.isArray(newData)) {
+        return null;
+      }
+
+      const newCount = newData.length;
+      const oldCount = oldData && Array.isArray(oldData) ? oldData.length : 0;
+
+      if (newCount <= oldCount) {
+        return null; // No new messages
+      }
+
+      const latestMessage = newData[newData.length - 1];
+      const senderUser = latestMessage.user;
+
+      // Don't notify the sender
+      if (senderUser === userId) {
+        return null;
+      }
+
+      logger.info(`New message for ${userId} from ${senderUser}`);
+
+      // Get user's device tokens
+      const tokensSnapshot = await admin.database()
+          .ref(`deviceTokens/${userId}`).once("value");
+      const tokens = tokensSnapshot.val();
+
+      if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
+        logger.info(`No device tokens found for ${userId}`);
+        return null;
+      }
+
+      // Get the answer to find the question text
+      const answerId = event.params.answerId;
+      const answerSnapshot = await admin.database()
+          .ref(`answers/${userId}/${answerId}`).once("value");
+      const answer = answerSnapshot.val();
+
+      // Create notification payload
+      const senderName = senderUser === "josh" ? "Josh" : "Nini";
+      const messagePreview = latestMessage.text.length > 50 ?
+      latestMessage.text.substring(0, 50) + "..." :
+      latestMessage.text;
+
+      const payload = {
+        notification: {
+          title: `${senderName} replied`,
+          body: messagePreview,
+        },
+        data: {
+          type: "message",
+          questionId: answer?.questionId?.toString() || "",
+          url: "/answers",
+          tag: `message-${answer?.questionId || answerId}`,
+        },
+      };
+
+      // Send to all tokens
+      try {
+        const response = await admin.messaging().sendEachForMulticast({
+          tokens: tokens,
+          notification: payload.notification,
+          data: payload.data,
+        });
+
+        logger.info(`Successfully sent ${response.successCount} notifications`);
+
+        // Clean up any invalid tokens
+        if (response.failureCount > 0) {
+          const validTokens = tokens.filter((token, index) => {
+            return response.responses[index].success;
+          });
+          await admin.database()
+              .ref(`deviceTokens/${userId}`).set(validTokens);
+        }
+
+        return response;
+      } catch (error) {
+        logger.error("Error sending notification:", error);
+        return null;
+      }
+    });
+
+/**
+ * Helper function to generate a batch of questions
+ * Used by scheduled function
+ * @param {number} count - Number of questions to generate (default: 12)
+ * @return {Promise<Array>} Array of generated questions
+ */
+async function generateQuestionBatch(count = 12) {
+  const typeCounts = {
+    yes_no: Math.ceil(count / 9),
+    multiple_choice: Math.ceil(count / 9),
+    ranking: Math.ceil(count / 9),
+    short_form: Math.ceil(count / 9),
+    long_form: Math.ceil(count / 9),
+    would_you_rather: Math.ceil(count / 9),
+    hot_take: Math.ceil(count / 9),
+    this_or_that: 0,
+    hypothetical: Math.ceil(count / 9),
+  };
+
+  const allResults = {};
+
+  // Generate each question type separately
+  for (const [typeId, typeCount] of Object.entries(typeCounts)) {
+    if (typeCount > 0) {
+      const questionTypeKey = typeId.toUpperCase().replace(/-/g, "_");
+      const typeConfig = QUESTION_TYPES[questionTypeKey];
+
+      if (!typeConfig) {
+        logger.warn(`Unknown question type: ${typeId}`);
+        continue;
+      }
+
+      logger.info(`Generating ${typeCount} ${typeId} questions`);
+
+      const groqResponse = await fetch(
+          "https://api.groq.com/openai/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${groqApiKey.value()}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "llama-3.1-8b-instant",
+              messages: [
+                {
+                  role: "system",
+                  content: typeConfig.prompt,
+                },
+                {
+                  role: "user",
+                  content: typeConfig.userPrompt(typeCount),
+                },
+              ],
+              temperature: 0.9,
+              max_tokens: 2000,
+            }),
+          },
+      );
+
+      if (!groqResponse.ok) {
+        const errorText = await groqResponse.text();
+        logger.error(`Groq API error for ${typeId}:`, groqResponse.status, errorText);
+        throw new Error(`Groq API error for ${typeId}: ${groqResponse.status}`);
+      }
+
+      const data = await groqResponse.json();
+      const content = data.choices[0]?.message?.content;
+
+      if (!content) {
+        throw new Error(`No content in Groq API response for ${typeId}`);
+      }
+
+      const parsedContent = JSON.parse(content.trim());
+      allResults[typeId] = parsedContent;
+    }
+  }
+
+  // Convert to app format
+  const allQuestions = [];
+  let idCounter = Date.now();
+
+  // Yes/No questions
+  (allResults.yes_no || []).forEach((text) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "yes_no",
+      text: text.toLowerCase().trim(),
+    });
+  });
+
+  // Multiple choice questions
+  (allResults.multiple_choice || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "multiple_choice",
+      text: q.question.toLowerCase().trim(),
+      options: q.options,
+    });
+  });
+
+  // Ranking questions
+  (allResults.ranking || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "ranking",
+      text: q.question.toLowerCase().trim(),
+      items: q.items,
+    });
+  });
+
+  // Short-form questions
+  (allResults.short_form || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "short_form",
+      text: q.question.toLowerCase().trim(),
+    });
+  });
+
+  // Long-form questions
+  (allResults.long_form || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "long_form",
+      text: q.question.toLowerCase().trim(),
+      scenario: q.scenario,
+    });
+  });
+
+  // Would You Rather questions
+  (allResults.would_you_rather || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "would_you_rather",
+      text: q.question.toLowerCase().trim(),
+      option1: q.option1,
+      option2: q.option2,
+    });
+  });
+
+  // Hot Take questions
+  (allResults.hot_take || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "hot_take",
+      text: q.question.toLowerCase().trim(),
+    });
+  });
+
+  // This or That questions
+  (allResults.this_or_that || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "this_or_that",
+      text: q.question.toLowerCase().trim(),
+      option1: q.option1,
+      option2: q.option2,
+    });
+  });
+
+  // Hypothetical questions
+  (allResults.hypothetical || []).forEach((q) => {
+    allQuestions.push({
+      id: idCounter++,
+      type: "hypothetical",
+      text: q.question.toLowerCase().trim(),
+    });
+  });
+
+  // Shuffle the questions
+  for (let i = allQuestions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
+  }
+
+  return allQuestions;
+}
+
+/**
+ * Scheduled Cloud Function to generate questions every 10 minutes
+ * Maintains separate question pools for josh and nini
+ */
+exports.generateQuestionPools = require("firebase-functions/v2/scheduler")
+    .onSchedule(
+        {
+          schedule: "*/10 * * * *", // Every 10 minutes
+          timeZone: "America/New_York",
+          secrets: [groqApiKey],
+          maxInstances: 1,
+        },
+        async () => {
+          try {
+            logger.info("Starting scheduled question generation");
+
+            const users = ["josh", "nini"];
+            const POOL_SIZE = 12;
+            const MIN_QUESTIONS_THRESHOLD = 5;
+
+            for (const userId of users) {
+              try {
+                // Get current pool data
+                const poolRef = admin.database().ref(`questionPools/${userId}`);
+                const poolSnapshot = await poolRef.once("value");
+                const poolData = poolSnapshot.val() || {};
+
+                const existingQuestions = poolData.questions || [];
+                const lastIndex = poolData.lastIndex || 0;
+                const remainingQuestions = existingQuestions.length - lastIndex;
+
+                logger.info(
+                    `User ${userId}: ${remainingQuestions} questions ` +
+                    `remaining (${existingQuestions.length} total, ` +
+                    `index at ${lastIndex})`,
+                );
+
+                // Only generate if running low on questions
+                if (remainingQuestions < MIN_QUESTIONS_THRESHOLD) {
+                  logger.info(`User ${userId} is running low on questions, generating new batch`);
+
+                  // Generate new questions
+                  const newQuestions = await generateQuestionBatch(POOL_SIZE);
+
+                  // Remove already-used questions and append new ones
+                  const updatedQuestions = [
+                    ...existingQuestions.slice(lastIndex),
+                    ...newQuestions,
+                  ].slice(0, POOL_SIZE); // Keep max 12 questions
+
+                  // Update the pool in database
+                  await poolRef.set({
+                    questions: updatedQuestions,
+                    lastGenerated: Date.now(),
+                    lastIndex: 0, // Reset index since we're creating a fresh pool
+                  });
+
+                  logger.info(`Generated ${newQuestions.length} new questions for ${userId}`);
+                } else {
+                  logger.info(`User ${userId} has enough questions, skipping generation`);
+                }
+              } catch (userError) {
+                logger.error(`Error generating questions for ${userId}:`, userError);
+                // Continue with next user even if one fails
+              }
+            }
+
+            logger.info("Completed scheduled question generation");
+            return null;
+          } catch (error) {
+            logger.error("Error in scheduled question generation:", error);
+            throw error;
+          }
+        },
+    );
+
+/**
+ * One-time callable function to initialize question pools
+ * Call this manually after deployment to set up initial questions
+ */
+exports.initializeQuestionPools = onCall(
+    {
+      secrets: [groqApiKey],
+    },
+    async () => {
+      try {
+        logger.info("Initializing question pools");
+
+        const users = ["josh", "nini"];
+        const POOL_SIZE = 12;
+
+        for (const userId of users) {
+          try {
+            // Check if pool already exists
+            const poolRef = admin.database().ref(`questionPools/${userId}`);
+            const poolSnapshot = await poolRef.once("value");
+
+            if (poolSnapshot.exists()) {
+              logger.info(`Pool for ${userId} already exists, skipping`);
+              continue;
+            }
+
+            // Generate initial questions
+            logger.info(`Generating initial questions for ${userId}`);
+            const questions = await generateQuestionBatch(POOL_SIZE);
+
+            // Initialize the pool
+            await poolRef.set({
+              questions: questions,
+              lastGenerated: Date.now(),
+              lastIndex: 0,
+            });
+
+            logger.info(`Successfully initialized pool for ${userId} with ${questions.length} questions`);
+          } catch (userError) {
+            logger.error(`Error initializing pool for ${userId}:`, userError);
+            throw userError;
+          }
+        }
+
+        logger.info("Successfully initialized all question pools");
+        return {
+          success: true,
+          message: "Question pools initialized successfully",
+        };
+      } catch (error) {
+        logger.error("Error initializing question pools:", error);
+        throw new HttpsError(
+            "internal",
+            error.message || "Failed to initialize question pools",
+        );
+      }
+    },
+);

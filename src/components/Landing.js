@@ -14,6 +14,7 @@ function Landing() {
     'ok we\'re ready': '[ phew ]',
     'knock knock': '[ come in! ]',
     'come on in!': '[ ayo????? ]',
+    'these are really hard to come up with': '[ theyre WHAT????? ]',
     'hot and fresh questions, coming right up': '[ ayo????? ]',
     'sorry that took so long': '[ its ok josh i love you and im gonna text u a reminder of how much i love you right now ]',
   };
@@ -25,6 +26,10 @@ function Landing() {
   } else if (currentTheme === THEMES.CHRISTMAS) {
     QADictionary['merry christmas! questions ready'] = '[ merry christmas i love you ]';
     QADictionary['ho ho ho your questions are here'] = '[ best gift ever tbh ]';
+  } else if (currentTheme === THEMES.NEWYEARS) {
+    QADictionary['happy new year! your questions are ready'] = '[ happy new year babe!! ]';
+    QADictionary['new year new questions lets gooo'] = '[ omg yesss ]';
+    QADictionary['cheers to another year! questions ready'] = '[ clink! ]';
   }
 
   // Select a random Q&A pairing

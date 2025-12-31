@@ -89,6 +89,27 @@ body.theme-christmas {
   --color-warning: #d9a894;
 }
 
+/* New Year's Theme (12/26 - 1/5) - Gold and Black */
+body.theme-newyears {
+  --bg-primary: #0f0f0f;
+  --text-primary: #f5e6d3;
+  --border-primary: #d4af37;
+
+  --text-secondary: #c9b896;
+  --text-muted: #8a7d66;
+  --bg-hover: #1a1a1a;
+  --border-focus: #ffd700;
+
+  --color-aim-yellow: #ffd700;
+  --color-aim-purple: #c9a0dc;
+  --color-josh: #d4af37;
+  --color-nini: #b8956f;
+
+  --color-info: #c9a0dc;
+  --color-success: #8fc9c9;
+  --color-warning: #e6b800;
+}
+
 /* Mobile-optimized spacing and typography */
 @media (max-width: 768px) {
   :root {

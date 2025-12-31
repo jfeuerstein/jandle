@@ -4,6 +4,7 @@ export const THEMES = {
   DEFAULT: 'default',
   BIRTHDAY: 'birthday',
   CHRISTMAS: 'christmas',
+  NEWYEARS: 'newyears',
 };
 
 /**
@@ -28,6 +29,14 @@ export const getCurrentTheme = () => {
     return THEMES.CHRISTMAS;
   }
 
+  // New Year's: 12/26 - 1/5 (inclusive)
+  if (month === 12 && day >= 26) {
+    return THEMES.NEWYEARS;
+  }
+  if (month === 1 && day <= 5) {
+    return THEMES.NEWYEARS;
+  }
+
   return THEMES.DEFAULT;
 };
 
@@ -41,6 +50,7 @@ export const getThemeDisplayName = (theme) => {
     [THEMES.DEFAULT]: 'Default',
     [THEMES.BIRTHDAY]: 'Birthday',
     [THEMES.CHRISTMAS]: 'Christmas',
+    [THEMES.NEWYEARS]: 'New Year\'s',
   };
   return names[theme] || 'Unknown';
 };

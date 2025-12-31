@@ -6,17 +6,16 @@ import Navigation from './components/Navigation';
 import Questions from './components/Questions';
 import Inbox from './components/Inbox';
 import Answers from './components/Answers';
-import BirthdayPuzzle from './components/BirthdayPuzzle';
-import BirthdayCard from './components/BirthdayCard';
+import Popup from './components/Popup';
+import PopupFlow from './components/PopupFlow';
+import { anniversaryFlow2026 } from './components/popupFlowConfigs';
 import ThemeParticles from './components/ThemeParticles';
 import { getCurrentTheme } from './utils/themeUtils';
 import { useButtonParticles } from './hooks/useButtonParticles';
 import './App.css';
 
-const BIRTHDAY_CARD_VIEWED_KEY = 'jandle_birthday_card_viewed_2024';
-
 function AppContent() {
-  const { currentUser, currentPage, switchPage } = useApp();
+  const { currentUser, currentPage, switchPage, acknowledgeVersion, getVersionInfo } = useApp();
   const [currentTheme, setCurrentTheme] = React.useState(getCurrentTheme());
 
   // Enable button particle effects
@@ -48,31 +47,48 @@ function AppContent() {
     );
   }
 
-  // Birthday puzzle page
-  if (currentPage === 'birthday-puzzle') {
-    const handlePuzzleComplete = () => {
-      switchPage('birthday-card');
+  // Version update popup
+  if (currentPage === 'version-popup') {
+    const versionInfo = getVersionInfo();
+
+    const handleVersionClose = () => {
+      acknowledgeVersion();
     };
+
+    const changelogMessage = versionInfo
+      ? `What's new:\n\n${versionInfo.changes.map(change => `• ${change}`).join('\n')}`
+      : "New version available!";
 
     return (
       <>
         <ThemeParticles theme={currentTheme} />
-        <BirthdayPuzzle onComplete={handlePuzzleComplete} />
+        <Popup
+          title={versionInfo?.title || "Update Available"}
+          message={changelogMessage}
+          buttonText="[ let's go! ]"
+          onClose={handleVersionClose}
+          showConfetti={true}
+        />
       </>
     );
   }
 
-  // Birthday card page
-  if (currentPage === 'birthday-card') {
-    const handleCardClose = () => {
-      localStorage.setItem(BIRTHDAY_CARD_VIEWED_KEY, 'true');
+  // Popup page - customize the message here whenever you want
+  if (currentPage === 'popup') {
+    const handlePopupClose = () => {
       switchPage('questions');
     };
 
     return (
       <>
         <ThemeParticles theme={currentTheme} />
-        <BirthdayCard onClose={handleCardClose} />
+        <Popup
+          title="hi there!"
+          message="This is a reusable popup.\n\nYou can hardcode any message you want here!\n\nJust edit the title, message, and buttonText props in App.js."
+          buttonText="[ ok cool ]"
+          onClose={handlePopupClose}
+          showConfetti={false}
+        />
       </>
     );
   }
@@ -80,6 +96,10 @@ function AppContent() {
   return (
     <>
       <ThemeParticles theme={currentTheme} />
+
+      {/* Popup flows - Add your flows here */}
+      <PopupFlow {...anniversaryFlow2026} />
+
       <div className="app-main">
         <Navigation />
         <div className="app-content">

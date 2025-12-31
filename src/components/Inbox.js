@@ -114,7 +114,9 @@ function Inbox() {
                     type: selectedQuestion.questionType || 'long_form',
                     options: selectedQuestion.questionOptions,
                     items: selectedQuestion.questionItems,
-                    scenario: selectedQuestion.questionScenario
+                    scenario: selectedQuestion.questionScenario,
+                    option1: selectedQuestion.questionOption1,
+                    option2: selectedQuestion.questionOption2
                   }}
                   onAnswer={handleSubmitAnswer}
                   onSkip={handleCancel}
