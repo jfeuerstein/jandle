@@ -2,7 +2,7 @@
 
 export const anniversaryFlow2026 = {
   flowId: '6m-anniversary-2026',
-  showAfter: '2025-01-01T00:00:00',
+  showAfter: '2026-01-01T00:00:00',
   showBefore: '2026-01-02T23:59:59',
   pages: [
     {
